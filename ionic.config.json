@@ -1,0 +1,7 @@
+{
+  "name": "call-coursy",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
