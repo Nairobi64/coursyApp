@@ -9,6 +9,25 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
+ /* 🎨 Thème Call-coursy Orange */
+:root {
+  --bs-primary: #ff6f00; /* orange vif */
+}
+
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+
+
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 

@@ -1,0 +1,25 @@
+<ion-content class="ion-padding">
+
+  <div *ngIf="loading">
+    <ion-spinner name="dots"></ion-spinner> Chargement...
+  </div>
+
+  <div *ngIf="!loading && driver">
+    <h2 class="text-xl font-bold text-orange-600 mb-4">
+      Bienvenue {{ driver.prenom }} 👋
+    </h2>
+
+    <ion-card>
+      <ion-card-content>
+        <p><strong>Nom :</strong> {{ driver.nom }}</p>
+        <p><strong>Email :</strong> {{ driver.email }}</p>
+        <p><strong>Téléphone :</strong> {{ driver.telephone }}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <div *ngIf="error" class="text-danger mt-3">
+    {{ error }}
+  </div>
+
+</ion-content>
