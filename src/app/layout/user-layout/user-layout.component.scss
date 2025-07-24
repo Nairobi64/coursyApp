@@ -1,0 +1,24 @@
+.user-info {
+  text-align: center;
+
+  ion-avatar {
+    margin: auto;
+    width: 80px;
+    height: 80px;
+    border: 2px solid #ff9800;
+    border-radius: 50%;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  h3 {
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    color: #333;
+  }
+}

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import { Injectable } from '@angular/core';import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut ,onAuthStateChanged} from '@angular/fire/auth';
 import { doc, Firestore, setDoc , getDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 
@@ -10,8 +10,38 @@ export class AuthServiceService {
    constructor(
     private auth: Auth,
     private firestore: Firestore,
-    private router: Router
+    private router: Router,
   ) {}
+
+
+    listenUserProfile() {
+    onAuthStateChanged(this.auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+        let userDoc = doc(this.firestore, `users/${uid}`);
+        let snap = await getDoc(userDoc);
+
+        if (!snap.exists()) {
+          userDoc = doc(this.firestore, `drivers/${uid}`);
+          snap = await getDoc(userDoc);
+        }
+
+        if (snap.exists()) {
+          const userData = snap.data() as any;
+          localStorage.setItem('currentUser', JSON.stringify({
+            uid,
+            role: userData.role,
+            prenom: userData.prenom,
+            nom: userData.nom,
+            email: userData.email
+          }));
+        }
+      } else {
+        localStorage.removeItem('currentUser');
+      }
+    });
+  }
+  
 
 
   async register(email: string, password: string, userData: any): Promise<void> {
@@ -33,7 +63,7 @@ export class AuthServiceService {
       if (role === 'driver') {
         this.router.navigate(['/profile-partenaire']);
       } else {
-        this.router.navigate(['/user/home']);
+        this.router.navigate(['/user/commande']);
       }
 
     } catch (error: any) {
@@ -44,7 +74,7 @@ export class AuthServiceService {
 
 redirectAfterLogin(role: string): void {
   if (role === 'user') {
-    this.router.navigate(['/user/home']);
+    this.router.navigate(['/user/commande']);
   } else if (role === 'driver') {
     this.router.navigate(['/profile-partenaire']);
   } else {
@@ -69,7 +99,7 @@ getCurrentUserData() {
 logout() {
   signOut(this.auth).then(() => {
     localStorage.removeItem('currentUser');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login-user']);
   });
 }
 

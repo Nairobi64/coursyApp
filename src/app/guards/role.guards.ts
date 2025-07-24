@@ -11,7 +11,7 @@ export const roleGuard = (expectedRole: string): CanActivateFn => {
 
     const user = auth.currentUser;
     if (!user) {
-      router.navigate(['/connexion-user']);
+      router.navigate(['/login-user']);
       return false;
     }
 

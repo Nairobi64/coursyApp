@@ -39,6 +39,12 @@ export class RegisterUserComponent implements OnInit {
     });
   }
 
+    invalid(field: string): boolean {
+    const control = this.registerForm.get(field);
+    return !!(control && control.invalid && control.touched);
+  }
+
+
   async register() {
   console.log('🟢 Tentative d’enregistrement');
   this.errorMessage = '';

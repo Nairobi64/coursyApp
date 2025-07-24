@@ -1,0 +1,116 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content class="ion-padding">
+  <div class="commande-modern">
+ 
+    <!-- Titre principal -->
+    <ion-card class="form-card ion-padding">
+     
+
+      <form [formGroup]="commandeForm" (ngSubmit)="onSubmit()">
+
+        <!-- Champ départ -->
+        <ion-item lines="full">
+          <ion-icon name="locate-outline" slot="start"></ion-icon>
+          <ion-input
+            formControlName="depart"
+            placeholder="Adresse de départ"
+            [value]="commandeForm.get('depart')?.value"
+            (ionInput)="searchPlace($event, 'depart')"
+            (ionFocus)="selectedField = 'depart'"
+            (ionBlur)="suggestions = []"
+          ></ion-input>
+        </ion-item>
+
+        <!-- Suggestions pour départ -->
+        <ion-list *ngIf="suggestions.length > 0 && selectedField === 'depart'">
+          <ion-item *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion, 'depart')">
+            {{ suggestion.description }}
+          </ion-item>
+        </ion-list>
+
+        <ion-text color="danger" *ngIf="formSubmitted && commandeForm.get('depart')?.hasError('required')">
+          <p class="ion-padding-start">L'adresse de départ est requise.</p>
+        </ion-text>
+
+        <!-- Champ destination -->
+        <ion-item lines="full" class="ion-margin-top">
+          <ion-icon name="flag-outline" slot="start"></ion-icon>
+          <ion-input
+            formControlName="destination"
+            placeholder="Adresse de destination"
+            [value]="commandeForm.get('destination')?.value"
+            (ionInput)="searchPlace($event, 'destination')"
+            (ionFocus)="selectedField = 'destination'"
+            (ionBlur)="suggestions = []"
+          ></ion-input>
+
+        </ion-item>
+
+        <!-- Suggestions pour destination -->
+        <ion-list *ngIf="suggestions.length > 0 && selectedField === 'destination'">
+          <ion-item *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion, 'destination')">
+            {{ suggestion.description }}
+          </ion-item>
+        </ion-list>
+
+        <ion-text color="danger" *ngIf="formSubmitted && commandeForm.get('destination')?.hasError('required')">
+          <p class="ion-padding-start">L'adresse de destination est requise.</p>
+        </ion-text>
+
+        <!-- Bouton commander -->
+        <ion-button expand="block" color="warning" type="submit" class="ion-margin-top">
+          <ion-icon name="navigate-outline" slot="start"></ion-icon>
+          Commander
+        </ion-button>
+
+        <!-- Message d'erreur -->
+        <ion-text color="danger" *ngIf="errorMessage">
+          <p class="ion-padding-start">{{ errorMessage }}</p>
+        </ion-text>
+      </form>
+    </ion-card>
+
+    <!-- Section services -->
+    <div class="services-section ion-margin-top">
+      <h3 class="services-title text-center">Nos Services</h3>
+
+      <div class="services-list grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <ion-card class="service-card taxi" (click)="goToTaxi()" color="light">
+          <ion-icon name="car-sport-outline" class="service-icon"></ion-icon>
+          <div>
+            <span class="service-name">Taxi</span> <br><br>
+            <img src="assets/images/taxi.jpeg" alt="Taxi" class="service-img" />
+            <p class="service-desc">Déplacez-vous rapidement en ville.</p>
+          </div>
+        </ion-card>
+
+        <ion-card class="service-card livraison" color="light">
+          <ion-icon name="bicycle-outline" class="service-icon"></ion-icon>
+          <div>
+            <span class="service-name">Livraison</span><br><br>
+            <img src="assets/images/coursier.jpeg" alt="Taxi" class="service-img" />
+            <p class="service-desc">Envoyez ou recevez vos colis facilement.</p>
+          </div>
+        </ion-card>
+
+        <ion-card class="service-card resto" (click)="goToResto()" color="light">
+          <ion-icon name="restaurant-outline" class="service-icon"></ion-icon>
+          <div>
+            <span class="service-name">Restaurant</span><br><br>
+            <img src="assets/images/restau.jpeg" alt="Taxi" class="service-img" />
+            <p class="service-desc">Commandez vos plats préférés.</p>
+          </div>
+        </ion-card>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

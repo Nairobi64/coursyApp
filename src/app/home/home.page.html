@@ -1,20 +1,19 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-     Call-coursy
+   
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding" style="--background: #ffa600; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;">
+  <img src="assets/icon/courier.svg" alt="Call-coursy" style="width: 120px; margin-bottom: 2rem;" />
+  <h2 style="color: #ff6600; font-weight: bold;">Call-coursy</h2>
+  
+</ion-content>
 
   <div id="container">
     <strong>Bienvenue sur call-coursy</strong>
-    <p> par ici <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components"> commander votre coursier</a></p>
+    <a [routerLink]="['/login-user']"> Connectez-vous </a>
   </div>
-</ion-content>
+

@@ -1,0 +1,38 @@
+<div class="login-page">
+  <a class="signup-button" [routerLink]="'/register-user'">S'inscrire</a>
+  <div class="login-card">
+    <h2 class="title">Connectez-vous</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="Entrez votre email"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="••••••••"
+        />
+      </div>
+
+      <!-- Bouton -->
+      <button type="submit" [disabled]="loginForm.invalid">Se connecter</button>
+
+      <!-- Message d'erreur -->
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+    </form>
+  </div>
+</div>

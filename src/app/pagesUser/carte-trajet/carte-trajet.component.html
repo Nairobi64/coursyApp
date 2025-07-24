@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" style="--background: #fff;">
+  <div class="trajet-container">
+    <!-- Carte Google Map -->
+    <div class="map-section">
+      <div id="map" style="width: 100%; height: 220px; border-radius: 18px;"></div>
+    </div>
+
+    <!-- Infos trajet -->
+    <ion-card class="recap-card">
+      <ion-card-content>
+        <div class="trajet-info">
+          <div class="trajet-row">
+            <ion-icon name="walk-outline"></ion-icon>
+            <span>Distance :</span>
+            <span>{{ trajet.Distance }} km</span>
+          </div>
+          <div class="trajet-row">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>Durée estimée :</span>
+            <span>{{ trajet.Duree }} min</span>
+          </div>
+          <div class="trajet-row">
+            <ion-icon name="cash-outline"></ion-icon>
+            <span>Prix :</span>
+            <span>{{ trajet.Prix }} FCFA</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Profil chauffeur/livreur -->
+    <ion-card class="driver-card">
+      <ion-card-content>
+        <div class="driver-info">
+          <img [src]="driver.photoURL || 'assets/images/chauffeur.jpeg'" alt="Photo" class="driver-photo" />
+          <div>
+            <div class="driver-name">{{ driver.nom }} {{ driver.prenom }}</div>
+            <div class="driver-role">{{ driver.role | titlecase }}</div>
+          </div>
+        </div>
+        <div class="driver-actions">
+          <ion-button color="primary" (click)="callDriver()">
+            <ion-icon name="call-outline" slot="start"></ion-icon>
+            Appeler
+          </ion-button>
+          <ion-button color="secondary" (click)="messageDriver()">
+            <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+            Message
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

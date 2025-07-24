@@ -1,8 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { AuthServiceService } from 'src/app/services/auth.service.service';
-import { Router, RouterModule } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthServiceService } from 'src/app/services/auth.service.service';
 
 @Component({
   selector: 'app-user-layout',
@@ -17,18 +17,22 @@ export class UserLayoutComponent  implements OnInit {
   private router = inject(Router);
 
   prenom = '';
+  photoUrl = '';
 
 
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUser();
+    const user = this.authService.getCurrentUser(); // doit retourner { prenom, photoUrl? }
     this.prenom = user?.prenom || '';
+    this.photoUrl = user?.photoUrl || '';
   }
 
-  logout() {
+   logout() {
     localStorage.clear();
-    location.href = '/connexion-user';
+    this.authService.logout();
+    location.href = '/login-user';
   }
+
 
   openWhatsApp(){
     

@@ -1,0 +1,48 @@
+<div class="register-page">
+ 
+
+  <div class="register-card">
+    <h2 class="title">Inscription utilisateur</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="register()" novalidate>
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" formControlName="nom" [class.invalid]="invalid('nom')" />
+        <div *ngIf="invalid('nom')" class="error-msg">Le nom est requis.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" formControlName="prenom" [class.invalid]="invalid('prenom')" />
+        <div *ngIf="invalid('prenom')" class="error-msg">Le prénom est requis.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="telephone">Téléphone</label>
+        <input type="tel" id="telephone" formControlName="telephone" [class.invalid]="invalid('telephone')" />
+        <div *ngIf="invalid('telephone')" class="error-msg">Le numéro de téléphone est requis.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" formControlName="email" [class.invalid]="invalid('email')" />
+        <div *ngIf="invalid('email')" class="error-msg">L'email est requis.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" formControlName="password" [class.invalid]="invalid('password')" />
+        <div *ngIf="invalid('password')" class="error-msg">Le mot de passe est requis.</div>
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid">S'inscrire</button>
+
+      <div *ngIf="errorMessage" class="error-global">{{ errorMessage }}</div>
+    </form>
+
+    <p class="bottom-link">
+      Déjà un compte ?
+      <a [routerLink]="'/login-user'">Se connecter</a>
+    </p>
+  </div>
+</div>

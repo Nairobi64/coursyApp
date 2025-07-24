@@ -1,0 +1,24 @@
+<ion-content class="ion-padding">
+  <h2 class="text-xl font-bold text-center mb-4">🕓 Historique des courses</h2>
+
+  <ion-spinner *ngIf="loading" name="crescent" color="warning"></ion-spinner>
+
+  <ion-list *ngIf="!loading && userCourses.length > 0">
+  <ion-item *ngFor="let course of userCourses">
+    <ion-label>
+      <h3><strong>Départ :</strong> {{ course.depart }}</h3>
+      <p><strong>Destination :</strong> {{ course.destination }}</p>
+      <p><strong>Distance :</strong> {{ course.distance }} km</p>
+      <p><strong>Durée :</strong> {{ course.duree }} min</p>
+      <p><strong>Prix :</strong> {{ course.prix }} FCFA</p>
+      <p><strong>Date :</strong> {{ course.createdAt?.toDate() | date:'medium' }}</p>
+      <p><strong>Statut :</strong> <span [style.color]="getStatusColor(course.statut)">{{ course.statut }}</span></p>
+    </ion-label>
+  </ion-item>
+</ion-list>
+
+
+  <div *ngIf="!loading && userCourses.length === 0" class="text-center text-gray-500">
+    Aucun trajet effectué pour le moment.
+  </div>
+</ion-content>
