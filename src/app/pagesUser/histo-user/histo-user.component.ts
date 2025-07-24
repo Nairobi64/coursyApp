@@ -54,11 +54,16 @@ export class HistoUserComponent implements OnInit {
   }
 
   getStatusColor(status: string): string {
-    switch (status) {
-      case 'en attente': return 'orange';
-      case 'confirmée': return 'green';
-      case 'annulée': return 'red';
-      default: return 'gray';
-    }
+  switch (status) {
+    case 'en attente':
+      return 'warning';
+    case 'confirmée':
+      return 'success';
+    case 'annulée':
+      return 'danger';
+    default:
+      return 'medium';
   }
+}
+
 }

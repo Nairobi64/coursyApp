@@ -86,7 +86,9 @@ ngAfterViewInit() {
   }
 
   messageDriver() {
-    window.open(`sms:${this.driver.telephone}`);
-  }
+  const phone = this.driver.telephone.replace('+', '').replace(/\s+/g, ''); // WhatsApp n'accepte pas le "+"
+  const message = encodeURIComponent(`Bonjour ${this.driver.nom}, je suis votre client sur Call-coursy.`);
+  window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+}
 
 }

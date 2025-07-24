@@ -77,21 +77,14 @@ export class TrajetTaxiComponent  implements OnInit {
     return;
   }
 
-const commandeUser: Omit<CommandeUser, 'id'> & {
-    uid: string;
-    service: string;
-    driver: {
-      nom: string;
-      photoURL: string;
-    };
-  } = {
+  const data = {
     depart: this.depart,
     destination: this.destination,
     distance: this.distance,
     duree: this.duree,
     prix: this.prix,
     statut: 'en attente',
-    createdAt: new Date(), // ou serverTimestamp() si tu veux l’heure Firebase
+    createdAt: new Date(),
     uid: user.uid,
     service: 'taxi',
     driver: {
@@ -101,12 +94,22 @@ const commandeUser: Omit<CommandeUser, 'id'> & {
   };
 
   try {
-    await addDoc(collection(this.firestore, 'commandes'), commandeUser);
-    alert('✅ Commande enregistrée avec succès !');
-    this.router.navigate(['/user/paiement']); // Redirige une fois l'enregistrement réussi
+    // 1. Enregistrement dans commandes
+    await addDoc(collection(this.firestore, 'commandes'), data);
+
+    // 2. Enregistrement dans historiques
+    await addDoc(collection(this.firestore, 'historiques'), {
+      ...data,
+      statut: 'terminée', // ou un autre statut pour marquer que c’est de l’historique
+      enregistreLe: new Date()
+    });
+
+    alert('Votre chauffeur est en route !');
+    this.router.navigate(['/user/histoUser']);
   } catch (error) {
-    console.error('Erreur enregistrement :', error);
-    alert('❌ Une erreur est survenue lors de l’enregistrement.');
+    console.error('Erreur lors de l’enregistrement :', error);
+    alert('Une erreur est survenue lors de l’enregistrement.');
   }
-  }
+}
+
 }
