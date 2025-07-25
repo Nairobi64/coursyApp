@@ -44,18 +44,18 @@ export const routes: Routes = [
   },
 
   // Espace chauffeur
-  // {
-  //   path: 'driver',
-  //   canActivate: [authGuard, roleGuard('driver')],
-  //   loadComponent: () => import('./layout/').then(m => m.DriverLayoutComponent),
-  //   children: [
-  //     { path: '', redirectTo: 'courses', pathMatch: 'full' },
-  //     { path: 'courses', loadComponent: () => import('./pagesDriver/courses/courses.component').then(m => m.CoursesComponent) },
-  //     { path: 'historique', loadComponent: () => import('./pagesDriver/historique/historique.component').then(m => m.HistoriqueComponent) },
-  //     { path: 'profil', loadComponent: () => import('./pagesDriver/profil/profil.component').then(m => m.ProfilComponent) },
+  {
+    path: 'driver',
+    canActivate: [authGuard, roleGuard('driver')],
+    loadComponent: () => import('./layout/driver-menu/driver-menu.component').then(m => m.DriverMenuComponent),
+    children: [
+      { path: '', redirectTo: 'courses', pathMatch: 'full' },
+      { path: 'courses', loadComponent: () => import('./pagesDriver/courses/courses.component').then(m => m.CoursesComponent) },
+      { path: 'historique', loadComponent: () => import('./pagesDriver/historique/historique.component').then(m => m.HistoriqueComponent) },
+      { path: 'profile', loadComponent: () => import('./pagesDriver/driver-profil/driver-profil.component').then(m => m.DriverProfilComponent) },
       
-  //   ]
-  // },
+    ]
+  },
 
   // Espace livreur
   // {

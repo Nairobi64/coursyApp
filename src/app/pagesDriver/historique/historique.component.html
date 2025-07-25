@@ -1,11 +1,16 @@
-<ion-header>
-      <ion-toolbar>
-        <ion-title>Historique</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content>
-      <p>Ici s'affichera l'historique des commandes...</p>
-    </ion-content>
+<ion-segment [(ngModel)]="filter" (ionChange)="applyFilter()">
+  <ion-segment-button value="tous">Tous</ion-segment-button>
+  <ion-segment-button value="acceptée">Acceptées</ion-segment-button>
+  <ion-segment-button value="refusée">Refusées</ion-segment-button>
+</ion-segment>
 
-    <ion-router-outlet></ion-router-outlet>
-<ion-header>
+<ion-list>
+  <ion-item *ngFor="let course of filteredCourses">
+    <ion-label>
+      <h5>{{ course.depart }} → {{ course.destination }}</h5>
+      <p>{{ course.date | date:'short' }} -
+        <strong [ngStyle]="{color: course.status === 'acceptée' ? 'green' : 'red'}">{{ course.status }}</strong>
+      </p>
+    </ion-label>
+  </ion-item>
+</ion-list>

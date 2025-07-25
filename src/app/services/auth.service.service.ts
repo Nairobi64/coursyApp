@@ -61,7 +61,7 @@ export class AuthServiceService {
 
       // 🔁 Redirection selon le rôle (optionnel ici)
       if (role === 'driver') {
-        this.router.navigate(['/profile-partenaire']);
+        this.router.navigate(['/profile']);
       } else {
         this.router.navigate(['/user/commande']);
       }
@@ -76,7 +76,7 @@ redirectAfterLogin(role: string): void {
   if (role === 'user') {
     this.router.navigate(['/user/commande']);
   } else if (role === 'driver') {
-    this.router.navigate(['/profile-partenaire']);
+    this.router.navigate(['/driver/profile']);
   } else {
     this.router.navigate(['/indisponible']);
   }

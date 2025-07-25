@@ -1,5 +1,5 @@
 <div class="login-page">
-  <a class="signup-button" [routerLink]="'/register-user'">S'inscrire</a>
+ 
   <div class="login-card">
     <h2 class="title">Connectez-vous</h2>
 
@@ -24,6 +24,10 @@
           formControlName="password"
           placeholder="••••••••"
         />
+      </div>
+
+      <div>
+         <a [routerLink]="['/register-user']"> Creez un compte </a>
       </div>
 
       <!-- Bouton -->

@@ -1,4 +1,5 @@
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 
 import { bootstrapApplication } from '@angular/platform-browser';

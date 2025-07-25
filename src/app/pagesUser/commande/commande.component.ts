@@ -23,6 +23,8 @@ export class CommandeComponent  implements OnInit {
   errorMessage: string = '';
 
   autocompleteService!: google.maps.places.AutocompleteService;
+  placeService!: google.maps.places.PlacesService;
+
 
   selectedField: 'depart' | 'destination' | null = null;
 
@@ -41,10 +43,12 @@ export class CommandeComponent  implements OnInit {
     });
     
      if (typeof google !== 'undefined') {
-      this.autocompleteService = new google.maps.places.AutocompleteService();
-    } else {
-      console.error('Google Maps JavaScript API non chargé.');
-    }
+    this.autocompleteService = new google.maps.places.AutocompleteService();
+
+    // Crée un élément fictif pour initialiser PlacesService
+    const dummyDiv = document.createElement('div');
+    this.placeService = new google.maps.places.PlacesService(dummyDiv);
+  }
 
     this.getCurrentPosition();
   }
@@ -77,10 +81,22 @@ export class CommandeComponent  implements OnInit {
   }
 
   selectSuggestion(suggestion: any, field: 'depart' | 'destination') {
-    this.commandeForm.patchValue({ [field]: suggestion.description });
-    this.suggestions = [];
-    this.selectedField = null;
-  }
+  if (!suggestion.place_id || !this.placeService) return;
+
+  this.placeService.getDetails({ placeId: suggestion.place_id }, (place, status) => {
+    if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+      const address = place.formatted_address || suggestion.description;
+
+      this.commandeForm.patchValue({ [field]: address });
+
+      this.suggestions = [];
+      this.selectedField = null;
+    } else {
+      console.error('Erreur lors de la récupération des détails du lieu.');
+    }
+  });
+}
+
 
   onSubmit() {
     this.formSubmitted = true;

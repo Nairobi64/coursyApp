@@ -1,35 +1,44 @@
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h2 class="text-center mb-4 call-orange">Inscription Partenaires</h2>
-      <form [formGroup]="registerForm" (ngSubmit)="register()">
-        <div class="mb-3">
-          <label for="nom" class="form-label">Nom</label>
-          <input type="text" class="form-control" id="nom" formControlName="nom" required>
-        </div>
-        <div class="mb-3">
-          <label for="prenom" class="form-label">Prénom</label>
-          <input type="text" class="form-control" id="prenom" formControlName="prenom" required>
-        </div>
-        <div class="mb-3">
-          <label for="telephone" class="form-label">Téléphone</label>
-          <input type="tel" class="form-control" id="telephone" formControlName="telephone" required>
-        </div>
-        <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" formControlName="email" required>
-        </div>
-        <div class="mb-3">
-          <label for="password" class="form-label">Mot de passe</label>
-          <input type="password" class="form-control" id="password" formControlName="password" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100" [disabled]="registerForm.invalid || loading">
-          Créer un compte
-        </button>
-        <div *ngIf="errorMessage" class="alert alert-danger mt-3">
-          {{ errorMessage }}
-        </div>
-      </form>
-    </div>
+<div class="register-container">
+  <div class="register-box">
+    <h2>Partenaire</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="register()">
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" formControlName="nom" required />
+      </div>
+
+      <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" formControlName="prenom" required />
+      </div>
+
+      <div class="form-group">
+        <label for="telephone">Téléphone</label>
+        <input type="tel" id="telephone" formControlName="telephone" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" formControlName="email" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" formControlName="password" required />
+      </div>
+
+        <div>
+         <a [routerLink]="['/login-driver']"> Deja un compte ? </a> <br> <br>
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid || loading">
+        Créer un compte
+      </button>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+    </form>
   </div>
 </div>

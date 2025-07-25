@@ -1,0 +1,39 @@
+<ion-split-pane contentId="main">
+  <!-- Menu latéral -->
+  <ion-menu contentId="main" type="overlay">
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Chauffeur</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-list>
+        <ion-item routerLink="/driver/profile" routerDirection="root">
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          Profil
+        </ion-item>
+
+        <ion-item routerLink="/driver/courses" routerDirection="root">
+          <ion-icon name="car-outline" slot="start"></ion-icon>
+          Mes courses
+        </ion-item>
+
+        <ion-item routerLink="/driver/historique" routerDirection="root">
+          <ion-icon name="time-outline" slot="start"></ion-icon>
+          Historique
+        </ion-item>
+
+        <ion-item (click)="logout()">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          Déconnexion
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <!-- Zone principale -->
+  <div class="ion-page" id="main">
+    <ion-router-outlet></ion-router-outlet>
+  </div>
+</ion-split-pane>

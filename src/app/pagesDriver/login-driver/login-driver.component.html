@@ -1,27 +1,33 @@
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h2 class="text-center mb-4 text-warning">Connexion Partenaire</h2>
+<div class="login-container">
+  <div class="login-box">
+    <h2> Connectez-vous</h2>
 
-      <form [formGroup]="loginForm" (ngSubmit)="login()">
-        <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" formControlName="email" required>
-        </div>
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" formControlName="email" required />
+      </div>
 
-        <div class="mb-3">
-          <label for="password" class="form-label">Mot de passe</label>
-          <input type="password" class="form-control" id="password" formControlName="password" required>
-        </div>
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" formControlName="password" required />
+      </div>
 
-        <button type="submit" class="btn btn-warning w-100" [disabled]="loginForm.invalid || loading">
-          Se connecter
-        </button>
+       <div>
+         <a [routerLink]="['/register-driver']"> Creez un compte </a>
+      </div><br>
 
-        <div *ngIf="errorMessage" class="alert alert-danger mt-3">
-          {{ errorMessage }}
-        </div>
-      </form>
-    </div>
+      <!-- Bouton -->
+      <button type="submit" [disabled]="loginForm.invalid || loading">
+        Se connecter
+      </button>
+
+      <!-- Erreur -->
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+    </form>
   </div>
 </div>

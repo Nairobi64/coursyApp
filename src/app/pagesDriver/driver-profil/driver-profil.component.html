@@ -1,25 +1,56 @@
-<ion-content class="ion-padding">
+<ion-content class="driver-profile-container">
+  <div class="profile-box">
 
-  <div *ngIf="loading">
-    <ion-spinner name="dots"></ion-spinner> Chargement...
+    <!-- Photo de profil -->
+    <div class="profile-image-section">
+      <img [src]="profileImage || 'assets/images/chauffeur.jpeg'" alt="Profil"
+           class="profile-img" />
+      <input type="file" (change)="onImageSelected($event)" id="fileInput" hidden>
+      <ion-button size="small" fill="clear" (click)="triggerFileInput()">Modifier</ion-button>
+    </div>
+
+    <!-- Nom du chauffeur -->
+    <h2 class="driver-name">{{ driver?.prenom }} {{ driver?.nom }}</h2>
+    <p class="driver-email">{{ driver?.email }}</p>
+
+    <!-- Bouton disponibilité -->
+    <ion-button 
+  [color]="isAvailable ? 'success' : 'medium'" 
+  (click)="toggleAvailability()" 
+  class="availability-button"
+  [class.pulse]="isAvailable">
+  {{ isAvailable ? 'Disponible' : 'Indisponible' }}
+</ion-button>
+
+    <!-- Résumé des courses -->
+    <div class="course-summary">
+      <div class="summary-box">
+        <h3>{{ acceptedCount }}</h3>
+        <p>Acceptées</p>
+      </div>
+      <div class="summary-box">
+        <h3>{{ refusedCount }}</h3>
+        <p>Refusées</p>
+      </div>
+      <div class="summary-box">
+        <h3>{{ totalCourses }}</h3>
+        <p>Total</p>
+      </div>
+    </div>
+
+    <!-- Historique -->
+    <div class="history-section">
+      <h4>Historique des courses</h4>
+      <ion-list>
+        <ion-item *ngFor="let course of courses">
+          <ion-label>
+            <h5>{{ course.depart }} → {{ course.destination }}</h5>
+            <p>{{ course.date | date:'short' }} - <strong [ngStyle]="{color: course.status === 'acceptée' ? 'green' : 'red'}">
+              {{ course.status }}
+            </strong></p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
   </div>
-
-  <div *ngIf="!loading && driver">
-    <h2 class="text-xl font-bold text-orange-600 mb-4">
-      Bienvenue {{ driver.prenom }} 👋
-    </h2>
-
-    <ion-card>
-      <ion-card-content>
-        <p><strong>Nom :</strong> {{ driver.nom }}</p>
-        <p><strong>Email :</strong> {{ driver.email }}</p>
-        <p><strong>Téléphone :</strong> {{ driver.telephone }}</p>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <div *ngIf="error" class="text-danger mt-3">
-    {{ error }}
-  </div>
-
 </ion-content>
