@@ -5,6 +5,7 @@ export interface Chauffeur {
   email: string;
   telephone: string;
   photoURL?: string;
+  ville :string;
   role: 'driver';
   vehicule: string;
   statut: 'disponible' | 'occupé';

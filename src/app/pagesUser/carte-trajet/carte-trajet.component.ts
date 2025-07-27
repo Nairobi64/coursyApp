@@ -29,13 +29,7 @@ export class CarteTrajetComponent  implements OnInit {
   };
 
 
-   driver = {
-    nom: 'Jean',
-    prenom: 'Dupont',
-    photoURL: 'assets/icon/driver.png',
-    role: 'chauffeur',
-    telephone: '+221700000000'
-  };
+   driver: any = null;
 
   constructor(private route: ActivatedRoute,
   ) {}
@@ -52,10 +46,17 @@ export class CarteTrajetComponent  implements OnInit {
       this.trajet.Duree = Number(params['duree']) || 0;
       this.trajet.Prix = Number(params['prix']) || 0;
     });
+
+    const user = this.auth.currentUser;
+    if (!user) {
+      console.error('Utilisateur non connecté');
+      return;
+    }
+
   }
 
 
-  async saveCommandeToFirestore() {
+ async saveCommandeToFirestore() {
   const user = this.auth.currentUser;
   if (!user) return;
 
@@ -67,34 +68,26 @@ export class CarteTrajetComponent  implements OnInit {
     distance: this.trajet.Distance,
     duree: this.trajet.Duree,
     prix: this.trajet.Prix,
-    statut: 'En attente',
-    driver: {
-      nom: this.driver.nom,
-      prenom: this.driver.prenom,
-      telephone: this.driver.telephone,
-      uid: this.driver|| null // utile pour la notif
-
-      // uid: this.driver.uid || null ** a ajouter lors de l'initialisation du chauffeur
-    }
+    statut: 'en attente', // 🔁 très important : doit correspondre à la requête du chauffeur
+    service: 'taxi' // 🔁 à ajouter si ton écoute côté chauffeur filtre sur ce champ
   };
 
   try {
+    // 🔁 Enregistrement dans l’historique de l’utilisateur
     const historiqueRef = collection(this.firestore, `users/${user.uid}/historique`);
     await addDoc(historiqueRef, commande);
-    console.log('Commande enregistrée dans l’historique');
+    console.log('✅ Commande ajoutée à l’historique');
 
-    // En option : tu peux aussi l'ajouter dans une collection centrale
-    // await addDoc(collection(this.firestore, 'commandes'), commande);
-
-    // 🔔 Envoie notification au livreur
-    // if (this.driver.uid) {
-    //   this.sendNotificationToDriver(this.driver.uid, 'Nouvelle commande', 'Un client vient de passer une commande.');
-    // }
+    // 🔁 Enregistrement dans la collection centrale "commandes"
+    const commandesRef = collection(this.firestore, 'commandes');
+    await addDoc(commandesRef, commande);
+    console.log('✅ Commande envoyée pour traitement aux chauffeurs');
 
   } catch (err) {
-    console.error('Erreur Firestore :', err);
+    console.error('❌ Erreur lors de la création de la commande :', err);
   }
 }
+
 
 // pour les notifications
 
@@ -171,16 +164,27 @@ ngAfterViewInit() {
   
   
   async callDriver() {
-  await this.saveCommandeToFirestore(); //  Enregistre dans Firestore
-  window.open(`tel:${this.driver.telephone}`);
+  await this.saveCommandeToFirestore(); // Enregistre dans Firestore
+
+  if (this.driver && this.driver.telephone) {
+    window.open(`tel:${this.driver.telephone}`);
+  } else {
+    console.warn('❌ Chauffeur introuvable ou numéro manquant');
+  }
 }
 
 async messageDriver() {
-  await this.saveCommandeToFirestore(); //  Enregistre dans Firestore
-  const phone = this.driver.telephone.replace('+', '').replace(/\s+/g, '');
-  const message = encodeURIComponent(`Bonjour ${this.driver.nom}, je suis votre client sur Call-coursy.`);
-  window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  await this.saveCommandeToFirestore(); // Enregistre dans Firestore
+
+  if (this.driver && this.driver.telephone) {
+    const phone = this.driver.telephone.replace('+', '').replace(/\s+/g, '');
+    const message = encodeURIComponent(`Bonjour ${this.driver.nom}, je suis votre client sur Call-coursy.`);
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  } else {
+    console.warn('❌ Impossible d’envoyer un message : chauffeur inconnu');
+  }
 }
+
 
 
 }

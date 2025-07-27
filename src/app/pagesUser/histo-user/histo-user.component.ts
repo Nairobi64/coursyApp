@@ -4,6 +4,7 @@ import { Auth } from '@angular/fire/auth';
 import { User } from 'firebase/auth';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-histo-user',

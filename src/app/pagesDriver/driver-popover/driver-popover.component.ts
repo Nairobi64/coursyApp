@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-driver-popover',
@@ -13,19 +14,23 @@ import { FormsModule } from '@angular/forms';
 export class DriverPopoverComponent  implements OnInit {
  
 
-  constructor(private popoverCtrl: PopoverController) {}
+  constructor(
+    private popoverController: PopoverController,
+    private router: Router
+  ) {}
  
 
   ngOnInit() {}
 
 
-  editProfile() {
-    this.popoverCtrl.dismiss();
-    // logiques de modification
+  async goToEditProfile() {
+    await this.popoverController.dismiss();
+    this.router.navigate(['/driver/modif-driver']); // ou autre route
   }
 
-  logout() {
-    this.popoverCtrl.dismiss();
-    // déconnexion
+  async logout() {
+    await this.popoverController.dismiss();
+    // Ajouter la logique de déconnexion si besoin
+    this.router.navigate(['/login-driver']);
   }
 }

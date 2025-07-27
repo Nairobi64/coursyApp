@@ -1,16 +1,59 @@
-<ion-segment [(ngModel)]="filter" (ionChange)="applyFilter()">
-  <ion-segment-button value="tous">Tous</ion-segment-button>
-  <ion-segment-button value="acceptée">Acceptées</ion-segment-button>
-  <ion-segment-button value="refusée">Refusées</ion-segment-button>
-</ion-segment>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Historique des courses</ion-title>
+  </ion-toolbar>
+</ion-header>
 
-<ion-list>
-  <ion-item *ngFor="let course of filteredCourses">
-    <ion-label>
-      <h5>{{ course.depart }} → {{ course.destination }}</h5>
-      <p>{{ course.date | date:'short' }} -
-        <strong [ngStyle]="{color: course.status === 'acceptée' ? 'green' : 'red'}">{{ course.status }}</strong>
-      </p>
-    </ion-label>
-  </ion-item>
-</ion-list>
+<ion-content class="ion-padding">
+
+  <!-- Filtre -->
+  <ion-segment [(ngModel)]="filter" (ionChange)="applyFilter()" value="tous" class="ion-margin-bottom">
+    <ion-segment-button value="tous">
+      Tous
+    </ion-segment-button>
+    <ion-segment-button value="acceptée">
+      Acceptées
+    </ion-segment-button>
+    <ion-segment-button value="refusée">
+      Refusées
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Total gain -->
+  <ion-card color="light">
+    <ion-card-header>
+      <ion-card-title>Mes gains</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <h2 class="ion-text-center text-success">{{ totalGain | currency:'XOF' }}</h2>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Liste des courses -->
+  <ion-list *ngIf="filteredCourses.length > 0; else noData">
+    <ion-item *ngFor="let course of filteredCourses">
+      <ion-label>
+        <h3>{{ course.depart }} → {{ course.destination }}</h3>
+        <p>
+          <strong>Status :</strong>
+          <span [style.color]="course.statut === 'acceptée' ? 'green' : 'red'">
+            {{ course.statut }}
+          </span>
+        </p>
+        <p><strong>Date :</strong> {{ course.date | date:'dd MMM yyyy' }}</p>
+        <p><strong>Prix :</strong> {{ course.prix | currency:'XOF' }}</p>
+        <p *ngIf="course.statut === 'acceptée'">
+          <strong>Gain :</strong> {{ getGain(course) | currency:'XOF' }}
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- Aucune course -->
+  <ng-template #noData>
+    <ion-text color="medium">
+      <p class="ion-text-center">Aucune course disponible pour ce filtre.</p>
+    </ion-text>
+  </ng-template>
+
+</ion-content>

@@ -8,7 +8,7 @@
         <ion-avatar class="ion-margin-bottom">
           <img [src]="photoUrl || 'assets/images/chauffeur.jpeg'" alt="Profil" />
         </ion-avatar>
-        <h3>Bienvenue {{ prenom }}</h3>
+        <h3>Bonjour {{ prenom }}</h3>
       </div>
 
       <ion-list>
@@ -26,7 +26,7 @@
         </ion-item>
         <ion-item routerLink="/user/profil" routerDirection="root">
           <ion-icon name="person-outline" slot="start"></ion-icon>
-          <ion-label>Profil</ion-label>
+          <ion-label>Service Client</ion-label>
         </ion-item>
 
         <ion-item (click)="logout()">

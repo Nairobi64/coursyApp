@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-title>Courses disponibles</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+        Retour
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list *ngIf="commandesEnAttente.length > 0; else noData">
+    <ion-item *ngFor="let course of commandesEnAttente">
+      <ion-label>
+        <h3>{{ course.data.depart }} → {{ course.data.destination }}</h3>
+        <p>Prix : {{ course.data.prix }} FCFA</p>
+      </ion-label>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <ion-button color="success" size="small" (click)="accepterCommande(course.id)">Accepter</ion-button>
+        <ion-button color="danger" size="small" (click)="refuserCommande(course.id)">Refuser</ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #noData>
+    <ion-text color="medium">
+      Aucune course disponible pour le moment.
+    </ion-text>
+  </ng-template>
+</ion-content>

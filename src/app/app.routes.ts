@@ -53,7 +53,9 @@ export const routes: Routes = [
       { path: 'courses', loadComponent: () => import('./pagesDriver/courses/courses.component').then(m => m.CoursesComponent) },
       { path: 'historique', loadComponent: () => import('./pagesDriver/historique/historique.component').then(m => m.HistoriqueComponent) },
       { path: 'profile', loadComponent: () => import('./pagesDriver/driver-profil/driver-profil.component').then(m => m.DriverProfilComponent) },
-      
+      { path: 'modif-driver', loadComponent: () => import('./pagesDriver/modif-infos-driver/modif-infos-driver.component').then(m => m.ModifInfosDriverComponent) },
+      { path: 'courses-disponibles', loadComponent: () => import('./pagesDriver/liste-courses/liste-courses.component').then(m => m.ListeCoursesComponent) },
+
     ]
   },
 

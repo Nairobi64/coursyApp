@@ -1,56 +1,91 @@
-<ion-content class="driver-profile-container">
-  <div class="profile-box">
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-title>Mon Profil</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="presentPopover($event)">
+        <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+        Menu
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
-    <!-- Photo de profil -->
-    <div class="profile-image-section">
-      <img [src]="profileImage || 'assets/images/chauffeur.jpeg'" alt="Profil"
-           class="profile-img" />
-      <input type="file" (change)="onImageSelected($event)" id="fileInput" hidden>
-      <ion-button size="small" fill="clear" (click)="triggerFileInput()">Modifier</ion-button>
-    </div>
+<ion-content class="ion-padding driver-profile-container">
 
-    <!-- Nom du chauffeur -->
-    <h2 class="driver-name">{{ driver?.prenom }} {{ driver?.nom }}</h2>
-    <p class="driver-email">{{ driver?.email }}</p>
+  <ion-card *ngIf="nouvelleCourse && disponible" color="light"  class="pulse-badge">
+  <ion-card-header>
+    <ion-card-title>🚨 Nouvelle course disponible</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    Une course est disponible ! <br>
+    <ion-button color="primary" routerLink="/driver/courses-disponibles">
+      Voir maintenant
+    </ion-button>
+  </ion-card-content>
+</ion-card>
 
-    <!-- Bouton disponibilité -->
+  <!-- Section photo + nom -->
+  <div class="profile-image-section">
+  <img [src]="profileImage || 'assets/images/chauffeur.jpeg'" alt="Profil" class="profile-img" />
+  <input type="file" id="fileInput" hidden (change)="onImageSelected($event)" />
+  <ion-button size="small" fill="clear" (click)="triggerFileInput()">Modifier</ion-button>
+
+   <h2 class="driver-name">{{ drivers.prenom }}</h2>
+    <p class="driver-city">{{ drivers.ville }}</p>
+</div>
+
+
+    <!-- Bouton Disponibilité -->
+     <div>
     <ion-button 
-  [color]="isAvailable ? 'success' : 'medium'" 
-  (click)="toggleAvailability()" 
-  class="availability-button"
-  [class.pulse]="isAvailable">
-  {{ isAvailable ? 'Disponible' : 'Indisponible' }}
+      [color]="disponible ? 'success' : 'medium'" 
+      (click)="toggleDisponibilite()" 
+      expand="block" 
+      class="availability-button">
+      {{ disponible ? 'Disponible' : 'Indisponible' }}
+    </ion-button>
+  </div>
+
+  <ion-button expand="block" color="primary" [routerLink]="['/driver/historique']">
+  Voir les courses disponibles
 </ion-button>
 
-    <!-- Résumé des courses -->
-    <div class="course-summary">
-      <div class="summary-box">
-        <h3>{{ acceptedCount }}</h3>
-        <p>Acceptées</p>
-      </div>
-      <div class="summary-box">
-        <h3>{{ refusedCount }}</h3>
-        <p>Refusées</p>
-      </div>
-      <div class="summary-box">
-        <h3>{{ totalCourses }}</h3>
-        <p>Total</p>
-      </div>
-    </div>
 
-    <!-- Historique -->
-    <div class="history-section">
-      <h4>Historique des courses</h4>
-      <ion-list>
-        <ion-item *ngFor="let course of courses">
-          <ion-label>
-            <h5>{{ course.depart }} → {{ course.destination }}</h5>
-            <p>{{ course.date | date:'short' }} - <strong [ngStyle]="{color: course.status === 'acceptée' ? 'green' : 'red'}">
-              {{ course.status }}
-            </strong></p>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </div>
+  <!-- Résumé des courses -->
+  <div class="course-summary">
+    <ion-grid>
+      <ion-row>
+        <ion-col class="summary-box">
+          <h3>{{ acceptedCount }}</h3>
+          <p>Acceptées</p>
+        </ion-col>
+        <ion-col class="summary-box">
+          <h3>{{ refusedCount }}</h3>
+          <p>Refusées</p>
+        </ion-col>
+        <ion-col class="summary-box">
+          <h3>{{ totalCourses }}</h3>
+          <p>Total</p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </div>
+
+  <!-- Historique -->
+  <div class="history-section">
+    <h4>Historique des courses</h4>
+    <ion-list>
+      <ion-item *ngFor="let course of filteredCourses">
+        <ion-label>
+          <h5>{{ course.depart }} → {{ course.destination }}</h5>
+          <p>
+            <strong [style.color]="course.status === 'acceptée' ? 'green' : 'red'">
+              {{ course.status }}
+            </strong>
+          </p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+
 </ion-content>

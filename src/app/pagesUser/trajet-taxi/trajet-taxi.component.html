@@ -4,9 +4,8 @@
     <ion-back-button defaultHref="/user/taxi" text="Retour" icon="arrow-back-outline"></ion-back-button>
   </ion-buttons>
 
-  <!-- Carte dans une carte -->
+  <!-- Carte -->
   <ion-card class="map-card">
-    
     <div id="map" style="width: 100%; height: 250px;"></div>
   </ion-card>
 
@@ -14,7 +13,6 @@
   <ion-card class="info-card">
     <ion-card-content>
       <div style="font-size: 1em; margin-bottom: 10px;">
-        <strong>Fait à :</strong> {{ createdAt }} min<br>
         <strong>Départ :</strong> {{ depart }}<br>
         <strong>Destination :</strong> {{ destination }}<br>
         <strong>Distance :</strong> {{ distance }} km<br>
@@ -22,18 +20,13 @@
         <strong>Prix :</strong>
         <span style="color: #ff6600; font-weight: bold;">
           {{ prix | number:'1.2-2' }} FCFA
-        </span>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <img [src]="driver.photoURL" alt="Photo chauffeur"
-             style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;" />
-        <div style="font-weight: 500;">{{ driver.nom }}</div>
+        </span><br>
+        <strong>Commande créée à :</strong> {{ createdAt }}
       </div>
     </ion-card-content>
   </ion-card>
 
-  <!-- Bouton de validation séparé -->
+  <!-- Bouton de validation -->
   <div class="validation-button">
     <ion-button expand="block" color="warning" size="large" (click)="validerCommande()">
       Valider votre commande

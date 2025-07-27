@@ -31,6 +31,7 @@ export class RegisterDriverComponent  implements OnInit {
     this.registerForm = this.fb.group({
       nom: ['', Validators.required],
       prenom: ['', Validators.required],
+      ville: ['', Validators.required],
       telephone: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{8,15}$')]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -44,15 +45,19 @@ export class RegisterDriverComponent  implements OnInit {
 
     if (this.registerForm.invalid) return;
 
-    const { nom, prenom, telephone, email, password } = this.registerForm.value;
+    const { nom, prenom,ville, telephone, email, password } = this.registerForm.value;
 
     try {
       await this.authService.register(email, password, {
         nom,
         prenom,
+        ville,
         telephone,
         role: 'driver',
-      });
+      }
+    );
+     this.router.navigate(['/driver/profile']);
+
 
       console.log('✅ Chauffeur inscrit');
     } catch (error: any) {

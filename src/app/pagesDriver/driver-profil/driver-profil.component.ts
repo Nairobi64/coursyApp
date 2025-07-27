@@ -1,11 +1,15 @@
-import { Component, inject ,OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
-import { RouterModule, Router } from '@angular/router';
-import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { IonicModule, PopoverController } from '@ionic/angular';
+import { RouterModule } from '@angular/router';
+import { ref, uploadBytes, getDownloadURL, Storage} from '@angular/fire/storage';
+import { AlertController } from '@ionic/angular';
 
-import { PopoverController } from '@ionic/angular';
+import { Auth} from '@angular/fire/auth';
+
+import {Firestore, doc, getDoc, getDocs, setDoc, collection,query, where, onSnapshot} from '@angular/fire/firestore';
+
+import { DriverPopoverComponent } from '../driver-popover/driver-popover.component';
 
 @Component({
   selector: 'app-driver-profil',
@@ -15,81 +19,200 @@ import { PopoverController } from '@ionic/angular';
   imports: [CommonModule, IonicModule, RouterModule],
 })
 export class DriverProfilComponent implements OnInit {
+  drivers = {
+    nom: '',
+    prenom: '',
+    ville: '',
+    photoUrl: ''
+  };
 
-  profileImage: string | null = null;
-  isAvailable: boolean = true;
-  driverId: string = '';
-  driver: any = {};
+  disponible = false;
+  nouvelleCourse = false;
 
   acceptedCount = 0;
   refusedCount = 0;
   totalCourses = 0;
 
-  courses: {
-    depart: string,
-    destination: string,
-    status: 'acceptée' | 'refusée',
-    date: string
+  filteredCourses: {
+    depart: string;
+    destination: string;
+    status: 'acceptée' | 'refusée';
+    date?: string;
   }[] = [];
 
+  profileImage: string | null = null;
+  selectedFile: File | null = null;
 
-  constructor(private firestore: Firestore, private auth: Auth) {}
+  constructor(
+    private auth: Auth,
+    private firestore: Firestore,
+    private popoverController: PopoverController,
+    private storage: Storage,
+    private alertCtrl: AlertController
+  ) {}
 
- async ngOnInit() {
+  async ngOnInit() {
     const user = this.auth.currentUser;
-  if (user) {
-    this.driverId = user.uid;
-    const driverRef = doc(this.firestore, 'chauffeurs', this.driverId);
-    const snapshot = await getDoc(driverRef);
-    if (snapshot.exists()) {
-      this.driver = snapshot.data();
-      this.profileImage = this.driver.photoURL || null;
-      this.isAvailable = this.driver.disponible ?? true;
+
+    if (user) {
+      const driverRef = doc(this.firestore, 'drivers', user.uid);
+      const snapshot = await getDoc(driverRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        this.drivers = {
+          nom: data['nom'] || '',
+          prenom: data['prenom'] || '',
+          ville: data['ville'] || '',
+          photoUrl: data['photoUrl'] || ''
+        };
+        this.profileImage = this.drivers.photoUrl;
+        this.disponible = data['disponible'] ?? false;
+
+        if (this.disponible) {
+          this.listenForCourses();
+        }
+      }
+
+      this.loadCourses();
+      this.detectLocation();
     }
-    this.fetchCourses();
-  }
   }
 
+  // 🔁 Active ou désactive la disponibilité
+  async toggleDisponibilite() {
+    this.disponible = !this.disponible;
+
+    const user = this.auth.currentUser;
+    if (user) {
+      const driverRef = doc(this.firestore, 'drivers', user.uid);
+      await setDoc(driverRef, { disponible: this.disponible }, { merge: true });
+
+      if (this.disponible) {
+        this.listenForCourses();
+      } else {
+        this.nouvelleCourse = false;
+      }
+    }
+  }
+
+  // 🔁 Écoute les courses disponibles en temps réel
+ listenForCourses() {
+  const q = query(
+    collection(this.firestore, 'commandes'),
+    where('statut', '==', 'en attente'),
+    where('service', '==', 'taxi'),
+    where('chauffeurId', '==', '')
+  );
+
+  let notifiedIds: string[] = [];
+
+    onSnapshot(q, snapshot => {
+    snapshot.docChanges().forEach(change => {
+      const docId = change.doc.id;
+      if (change.type === 'added' && !notifiedIds.includes(docId)) {
+        this.nouvelleCourse = true;
+        this.alertNewCommande(change.doc.data()['depart'], change.doc.data()['destination']);
+        notifiedIds.push(docId);
+      }
+    });
+
+    if (snapshot.size === 0) {
+      this.nouvelleCourse = false;
+    }
+  });
+}
+
+async alertNewCommande(depart: string, destination: string) {
+  const alert = await this.alertCtrl.create({
+    header: 'Nouvelle course disponible !',
+    message: `Départ : ${depart}<br>Destination : ${destination}`,
+    buttons: ['Voir plus tard']
+  });
+
+  await alert.present();
+}
+
+  // 📥 Téléversement de photo
   triggerFileInput() {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) fileInput.click();
   }
 
-  onImageSelected(event: any) {
+  async onImageSelected(event: any) {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.profileImage = reader.result as string;
-        // Optionnel : envoyer au backend / Firebase
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const filePath = `drivers/${user.uid}/profile.jpg`;
+    const fileRef = ref(this.storage, filePath);
+
+    try {
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+
+      const driverRef = doc(this.firestore, 'drivers', user.uid);
+      await setDoc(driverRef, { photoUrl: downloadURL }, { merge: true });
+
+      this.profileImage = downloadURL;
+      this.drivers.photoUrl = downloadURL;
+    } catch (error) {
+      console.error("Erreur d'upload :", error);
     }
   }
 
-  toggleAvailability() {
-    this.isAvailable = !this.isAvailable;
-    // Optionnel : mettre à jour l’état dans Firestore
+  // ✅ Charger les commandes affectées à ce chauffeur
+  async loadCourses() {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const q = query(
+      collection(this.firestore, 'commandes'),
+      where('chauffeurId', '==', user.uid)
+    );
+
+    const snapshot = await getDocs(q);
+    this.filteredCourses = snapshot.docs.map(doc => doc.data() as any);
+
+    this.acceptedCount = this.filteredCourses.filter(c => c.status === 'acceptée').length;
+    this.refusedCount = this.filteredCourses.filter(c => c.status === 'refusée').length;
+    this.totalCourses = this.filteredCourses.length;
   }
 
-  fetchDriverData() {
-    // Exemple : charger les infos depuis Firestore
-    this.driver = {
-      nom: 'Fall',
-      prenom: 'Amadou',
-      email: 'amadou@callcoursy.sn'
-    };
+  async presentPopover(ev: Event) {
+    const popover = await this.popoverController.create({
+      component: DriverPopoverComponent,
+      event: ev,
+      translucent: true,
+    });
+    await popover.present();
   }
 
-  fetchCourses() {
-    this.courses = [
-      { depart: 'Sacré-Cœur', destination: 'Plateau', status: 'acceptée', date: new Date().toISOString() },
-      { depart: 'Yoff', destination: 'Liberté 6', status: 'refusée', date: new Date().toISOString() },
-      // etc.
-    ];
+  // 📍 Mise à jour localisation en temps réel
+  async detectLocation() {
+    const user = this.auth.currentUser;
+    if (!user) return;
 
-    this.acceptedCount = this.courses.filter(c => c.status === 'acceptée').length;
-    this.refusedCount = this.courses.filter(c => c.status === 'refusée').length;
-    this.totalCourses = this.courses.length;
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          const driverRef = doc(this.firestore, 'drivers', user.uid);
+          await setDoc(driverRef, {
+            location: { lat, lng }
+          }, { merge: true });
+
+        },
+        (error) => {
+          console.error('Erreur de géolocalisation :', error);
+        }
+      );
+    } else {
+      console.error("La géolocalisation n'est pas supportée");
+    }
   }
 }
