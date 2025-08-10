@@ -1,20 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
+import { ConnecionPaternaireComponent } from './connecion-paternaire.component';
 
-import { IndisponibleComponent } from './indisponible.component';
-
-describe('IndisponibleComponent', () => {
-  let component: IndisponibleComponent;
-  let fixture: ComponentFixture<IndisponibleComponent>;
+describe('ConnecionPaternaireComponent', () => {
+  let component: ConnecionPaternaireComponent;
+  let fixture: ComponentFixture<ConnecionPaternaireComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ IndisponibleComponent ],
+      declarations: [ ConnecionPaternaireComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(IndisponibleComponent);
+    fixture = TestBed.createComponent(ConnecionPaternaireComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

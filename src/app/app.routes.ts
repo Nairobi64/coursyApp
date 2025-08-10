@@ -1,7 +1,7 @@
+import { InscriptionPartenaireComponent } from './pagesConnexionInscription/inscription-partenaire/inscription-partenaire.component';
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guards';
 import { roleGuard } from './guards/role.guards';
-import { HomePage } from './home/home.page';
 
 export const routes: Routes = [
  
@@ -11,14 +11,11 @@ export const routes: Routes = [
 
 
   // Authentification
+  { path: 'connexion-partenaire', loadComponent: () => import('./pagesConnexionInscription/connecion-paternaire/connecion-paternaire.component').then(m => m.ConnecionPaternaireComponent) },
+  { path: 'register-partenaire', loadComponent: () => import('./pagesConnexionInscription/inscription-partenaire/inscription-partenaire.component').then(m => m.InscriptionPartenaireComponent) },
   { path: 'login-user', loadComponent: () => import('./pagesUser/login-user/login-user.component').then(m => m.LoginUserComponent) },
   { path: 'register-user', loadComponent: () => import('./pagesUser/register-user/register-user.component').then(m => m.RegisterUserComponent) },
-  { path: 'login-driver', loadComponent: () => import('./pagesDriver/login-driver/login-driver.component').then(m => m.LoginDriverComponent) },
-  { path: 'register-driver', loadComponent: () => import('./pagesDriver/register-driver/register-driver.component').then(m => m.RegisterDriverComponent) },
-  // { path: 'login-courier', loadComponent: () => import('./pages/login-courier/login-courier.component').then(m => m.LoginCourierComponent) },
-  // { path: 'register-courier', loadComponent: () => import('./pages/register-courier/register-courier.component').then(m => m.RegisterCourierComponent) },
-  // { path: 'login-restaurant', loadComponent: () => import('./pages/login-restaurant/login-restaurant.component').then(m => m.LoginRestaurantComponent) },
-  // { path: 'register-restaurant', loadComponent: () => import('./pages/register-restaurant/register-restaurant.component').then(m => m.RegisterRestaurantComponent) },
+
 
   
 
@@ -27,7 +24,7 @@ export const routes: Routes = [
     path: 'user',
     
     loadComponent: () => import('./layout/user-layout/user-layout.component').then(m => m.UserLayoutComponent),
-    canActivate: [authGuard, roleGuard('user')],
+    // canActivate: [authGuard, roleGuard('users')],
     children: [
       { path: '', redirectTo: 'commande', pathMatch: 'full' },
       { path: 'commande', loadComponent: () => import('./pagesUser/commande/commande.component').then(m => m.CommandeComponent) },
@@ -46,7 +43,7 @@ export const routes: Routes = [
   // Espace chauffeur
   {
     path: 'driver',
-    canActivate: [authGuard, roleGuard('driver')],
+    // canActivate: [authGuard, roleGuard('drivers')],
     loadComponent: () => import('./layout/driver-menu/driver-menu.component').then(m => m.DriverMenuComponent),
     children: [
       { path: '', redirectTo: 'courses', pathMatch: 'full' },
@@ -60,34 +57,19 @@ export const routes: Routes = [
   },
 
   // Espace livreur
-  // {
-  //   path: 'courier',
-  //   canActivate: [authGuard, roleGuard('courier')],
-  //   loadComponent: () => import('./layouts/courier-layout/courier-layout.component').then(m => m.CourierLayoutComponent),
-  //   children: [
-  //     { path: '', redirectTo: 'livraisons', pathMatch: 'full' },
-  //     { path: 'livraisons', loadComponent: () => import('./pagesCourier/livraisons/livraisons.component').then(m => m.LivraisonsComponent) },
-  //     { path: 'historique', loadComponent: () => import('./pagesCourier/historique/historique.component').then(m => m.HistoriqueComponent) },
-  //     { path: 'profil', loadComponent: () => import('./pagesCourier/profil/profil.component').then(m => m.ProfilComponent) },
+  {
+    path: 'livreur',
+    // canActivate: [authGuard, roleGuard('livreur')],
+    // loadComponent: () => import('./layouts/courier-layout/courier-layout.component').then(m => m.CourierLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'livraisons', pathMatch: 'full' },
+      // { path: 'livraisons', loadComponent: () => import('./pagesCourier/livraisons/livraisons.component').then(m => m.LivraisonsComponent) },
+      // { path: 'historique', loadComponent: () => import('./pagesCourier/historique/historique.component').then(m => m.HistoriqueComponent) },
+      { path: 'profile', loadComponent: () => import('./pagesLivreur/profile-livreur/profile-livreur.component').then(m => m.ProfileLivreurComponent) },
       
-  //   ]
-  // },
+    ]
+  },
 
-
-  // Espace restaurant
-  // {
-  //   path: 'restaurant',
-  //   canActivate: [authGuard, roleGuard('restaurant')],
-  //   loadComponent: () => import('./layouts/restaurant-layout/restaurant-layout.component').then(m => m.RestaurantLayoutComponent),
-  //   children: [
-  //     { path: '', redirectTo: 'menu', pathMatch: 'full' },
-  //     { path: 'menu', loadComponent: () => import('./pagesRestaurant/menu/menu.component').then(m => m.MenuComponent) },
-  //     { path: 'commandes', loadComponent: () => import('./pagesRestaurant/commandes/commandes.component').then(m => m.CommandesComponent) },
-  //     { path: 'historique', loadComponent: () => import('./pagesRestaurant/historique/historique.component').then(m => m.HistoriqueComponent) },
-  //     { path: 'profil', loadComponent: () => import('./pagesRestaurant/profil/profil.component').then(m => m.ProfilComponent) },
-      
-  //   ]
-  // },
 
   // Page d’erreur ou indisponible
   { path: 'indisponible', loadComponent: () => import('./pagesDriver/indisponible/indisponible.component').then(m => m.IndisponibleComponent) }

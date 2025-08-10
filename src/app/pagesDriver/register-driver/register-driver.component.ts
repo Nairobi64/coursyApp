@@ -26,6 +26,28 @@ export class RegisterDriverComponent  implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthServiceService);
 
+  
+  constructor(
+  private firestore: Firestore,
+  private auth: Auth
+) {
+  this.registerForm = this.fb.group({
+  nom: ['', Validators.required],
+  prenom: ['', Validators.required],
+  ville: ['', Validators.required],
+  telephone: ['', Validators.required],
+  email: ['', [Validators.required, Validators.email]],
+  password: ['', [Validators.required, Validators.minLength(6)]],
+  role: ['drivers', Validators.required], // 👈 chauffeur/livreur
+  matricule: ['', Validators.required],
+  marque: ['', Validators.required],
+  couleur: ['', Validators.required]
+});
+
+}
+
+
+
   ngOnInit() {
 
     this.registerForm = this.fb.group({
@@ -35,36 +57,55 @@ export class RegisterDriverComponent  implements OnInit {
       telephone: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{8,15}$')]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      role: ['drivers', Validators.required], // 👈 chauffeur/livreur
+      matricule: ['', Validators.required],
+      marque: ['', Validators.required],
+      couleur: ['', Validators.required]
     });
   }
 
 
   async register() {
-    this.errorMessage = '';
-    this.loading = true;
+  this.errorMessage = '';
+  this.loading = true;
 
-    if (this.registerForm.invalid) return;
+  // Stop si invalide
+  if (this.registerForm.invalid) return;
 
-    const { nom, prenom,ville, telephone, email, password } = this.registerForm.value;
+  const {
+    nom,
+    prenom,
+    ville,
+    telephone,
+    email,
+    password,
+    role,        // 👈 Doit être présent dans le formulaire
+    matricule,
+    marque,
+    couleur
+  } = this.registerForm.value;
 
-    try {
-      await this.authService.register(email, password, {
-        nom,
-        prenom,
-        ville,
-        telephone,
-        role: 'driver',
-      }
-    );
-     this.router.navigate(['/driver/profile']);
+  try {
+    await this.authService.register(email, password, {
+      nom,
+      prenom,
+      ville,
+      telephone,
+      role,        // 'chauffeur' ou 'livreur'
+      matricule,
+      marque,
+      couleur,
+      disponible: false // par défaut
+    });
 
-
-      console.log('✅ Chauffeur inscrit');
-    } catch (error: any) {
-      this.errorMessage = error.message;
-    } finally {
-      this.loading = false;
-    }
+    this.router.navigate(['/driver/profile']);
+    console.log('✅ Chauffeur inscrit avec succès');
+  } catch (error: any) {
+    this.errorMessage = error.message;
+  } finally {
+    this.loading = false;
   }
+}
+
 
 }

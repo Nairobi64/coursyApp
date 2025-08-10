@@ -4,7 +4,7 @@
   <div class="register-card">
     <h2 class="title" style="color: #ffa600;">Bienvenue </h2>
 
-    <form [formGroup]="registerForm" (ngSubmit)="register()" novalidate>
+    <form [formGroup]="registerForm" (ngSubmit)="registerUser()" novalidate>
       <div class="form-group">
         <label for="nom">Nom</label>
         <input type="text" id="nom" formControlName="nom" [class.invalid]="invalid('nom')" />

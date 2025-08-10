@@ -4,6 +4,8 @@ import { IonicModule, PopoverController } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 import { ref, uploadBytes, getDownloadURL, Storage} from '@angular/fire/storage';
 import { AlertController } from '@ionic/angular';
+import { CommandeService } from 'src/app/services/commande.service';
+import { UserService } from 'src/app/services/user.service';
 
 import { Auth} from '@angular/fire/auth';
 
@@ -20,11 +22,17 @@ import { DriverPopoverComponent } from '../driver-popover/driver-popover.compone
 })
 export class DriverProfilComponent implements OnInit {
   drivers = {
-    nom: '',
-    prenom: '',
-    ville: '',
-    photoUrl: ''
-  };
+  nom: '',
+  prenom: '',
+  ville: '',
+  role: 'chauffeur' as 'chauffeur' | 'livreur',
+  matricule: '',
+  marque: '',
+  couleur: '',
+  uid: '',
+  photoUrl: '',
+  disponible: false // ✅ ajouté
+};
 
   disponible = false;
   nouvelleCourse = false;
@@ -48,36 +56,83 @@ export class DriverProfilComponent implements OnInit {
     private firestore: Firestore,
     private popoverController: PopoverController,
     private storage: Storage,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private commandeService: CommandeService,
+    private userService: UserService
   ) {}
 
   async ngOnInit() {
-    const user = this.auth.currentUser;
+  const user = this.auth.currentUser;
 
-    if (user) {
-      const driverRef = doc(this.firestore, 'drivers', user.uid);
-      const snapshot = await getDoc(driverRef);
+  if (!user) return;
 
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        this.drivers = {
-          nom: data['nom'] || '',
-          prenom: data['prenom'] || '',
-          ville: data['ville'] || '',
-          photoUrl: data['photoUrl'] || ''
-        };
-        this.profileImage = this.drivers.photoUrl;
-        this.disponible = data['disponible'] ?? false;
+  const driverRef = doc(this.firestore, 'drivers', user.uid);
+  const snapshot = await getDoc(driverRef);
 
-        if (this.disponible) {
-          this.listenForCourses();
-        }
-      }
+  if (snapshot.exists()) {
+    const data = snapshot.data();
+    this.drivers = {
+      nom: data['nom'] || '',
+      prenom: data['prenom'] || '',
+      ville: data['ville'] || '',
+      role: data['role'] || 'chauffeur',
+      matricule: data['matricule'] || '',
+      marque: data['marque'] || '',
+      couleur: data['couleur'] || '',
+      uid: user.uid, // 🔐 récupéré via Auth
+      photoUrl: data['photoUrl'] || '',
+      disponible: data['disponible'] ?? false
+    };
 
-      this.loadCourses();
-      this.detectLocation();
+    this.profileImage = this.drivers.photoUrl;
+    this.disponible = this.drivers.disponible;
+
+    if (this.drivers.role === 'chauffeur' && this.disponible) {
+      this.listenForCourses();
     }
+
+
+    if (this.drivers.role === 'livreur' && this.disponible) {
+      this.listenForDeliveries();
+    }
+
   }
+
+  this.loadCourses();
+  this.detectLocation();
+}
+
+
+listenForDeliveries() {
+  const q = query(
+    collection(this.firestore, 'commandes'),
+    where('statut', '==', 'en attente'),
+    where('service', '==', 'livraison'),
+    where('chauffeurId', '==', '')
+  );
+
+  let notifiedIds: string[] = [];
+
+  onSnapshot(q, snapshot => {
+    snapshot.docChanges().forEach(change => {
+      const docId = change.doc.id;
+      if (change.type === 'added' && !notifiedIds.includes(docId)) {
+        this.nouvelleCourse = true;
+        this.alertNewCommande(
+          change.doc.data()['depart'],
+          change.doc.data()['destination']
+        );
+        notifiedIds.push(docId);
+      }
+    });
+
+    if (snapshot.size === 0) {
+      this.nouvelleCourse = false;
+    }
+  });
+}
+
+
 
   // 🔁 Active ou désactive la disponibilité
   async toggleDisponibilite() {

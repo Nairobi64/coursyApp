@@ -1,20 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
+import { ProfileLivreurComponent } from './profile-livreur.component';
 
-import { IndisponibleComponent } from './indisponible.component';
-
-describe('IndisponibleComponent', () => {
-  let component: IndisponibleComponent;
-  let fixture: ComponentFixture<IndisponibleComponent>;
+describe('ProfileLivreurComponent', () => {
+  let component: ProfileLivreurComponent;
+  let fixture: ComponentFixture<ProfileLivreurComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ IndisponibleComponent ],
+      declarations: [ ProfileLivreurComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(IndisponibleComponent);
+    fixture = TestBed.createComponent(ProfileLivreurComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

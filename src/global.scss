@@ -28,6 +28,28 @@
 }
 
 
+.custom-alert .alert-message {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+}
+
+.custom-alert .alert-button-cancel {
+  --background: #ccc;
+  --color: #333;
+}
+
+.custom-alert .alert-button-validate {
+  --background: var(--ion-color-primary);
+  --color: #fff;
+  font-weight: bold;
+}
+
+.custom-alert .alert-message p {
+  margin: 0.4em 0;
+}
+
+
+
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 

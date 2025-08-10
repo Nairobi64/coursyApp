@@ -1,8 +1,13 @@
-interface Course {
+export interface Course {
   depart: string;
   destination: string;
-  status: 'en_attente' |'acceptée' | 'refusée';
   date: string;
   prix: number;
-  chauffeurId?: string;
+  status: 'en_attente' | 'acceptée' | 'refusée';
+  livreur?: {
+    uid: string;
+    prenom: string;
+    photoURL: string;
+    telephone: string;
+  };
 }

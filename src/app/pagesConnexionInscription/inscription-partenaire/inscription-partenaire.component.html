@@ -1,0 +1,37 @@
+<div class="register-container">
+  <div class="tab-buttons">
+    <button [class.active]="activeTab === 'drivers'" (click)="activeTab = 'drivers'">Chauffeur</button>
+    <button [class.active]="activeTab === 'livreurs'" (click)="activeTab = 'livreurs'">Livreur</button>
+  </div>
+
+  <!-- Formulaire chauffeur -->
+  <form *ngIf="activeTab === 'drivers'" [formGroup]="chauffeurForm" (ngSubmit)="register('drivers')">
+    <h2> Partenaire Chauffeur</h2>
+    <ion-item><ion-label position="floating">Nom</ion-label><ion-input formControlName="nom"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Prénom</ion-label><ion-input formControlName="prenom"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Ville</ion-label><ion-input formControlName="ville"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Téléphone</ion-label><ion-input formControlName="telephone"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Email</ion-label><ion-input formControlName="email"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Mot de passe</ion-label><ion-input type="password" formControlName="password"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Matricule</ion-label><ion-input formControlName="matricule"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Marque</ion-label><ion-input formControlName="marque"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Couleur</ion-label><ion-input formControlName="couleur"></ion-input></ion-item>
+    <ion-button expand="block" type="submit" [disabled]="chauffeurForm.invalid || loading">Créer un compte</ion-button>
+  </form>
+
+  <!-- Formulaire livreur -->
+  <form *ngIf="activeTab === 'livreurs'" [formGroup]="livreurForm" (ngSubmit)="register('livreurs')">
+    <h2>Partenaire Livreur</h2>
+    <ion-item><ion-label position="floating">Nom</ion-label><ion-input formControlName="nom"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Prénom</ion-label><ion-input formControlName="prenom"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Ville</ion-label><ion-input formControlName="ville"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Téléphone</ion-label><ion-input formControlName="telephone"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Email</ion-label><ion-input formControlName="email"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Matricule</ion-label><ion-input formControlName="Matricule"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Couleur</ion-label><ion-input formControlName="Couleur"></ion-input></ion-item>
+    <ion-item><ion-label position="floating">Mot de passe</ion-label><ion-input type="password" formControlName="password"></ion-input></ion-item>
+    <ion-button expand="block" type="submit" [disabled]="livreurForm.invalid || loading">Créer un compte</ion-button>
+  </form>
+
+  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+</div>

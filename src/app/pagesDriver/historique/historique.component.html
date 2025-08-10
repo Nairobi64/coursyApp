@@ -31,7 +31,7 @@
 
   <!-- Liste des courses -->
   <ion-list *ngIf="filteredCourses.length > 0; else noData">
-    <ion-item *ngFor="let course of filteredCourses">
+    <ion-item *ngFor="let course of filtered" class="ion-activatable ripple-parent">
       <ion-label>
         <h3>{{ course.depart }} → {{ course.destination }}</h3>
         <p>

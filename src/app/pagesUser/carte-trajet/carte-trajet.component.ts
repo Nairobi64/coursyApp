@@ -53,6 +53,16 @@ export class CarteTrajetComponent  implements OnInit {
       return;
     }
 
+
+    this.route.queryParams.subscribe(params => {
+    const commandeId = params['commandeId'];
+    if (commandeId) {
+      this.loadCommandeAndDriver(commandeId);
+    } else {
+      console.warn('ID de commande manquant');
+    }
+  });
+
   }
 
 
@@ -123,6 +133,39 @@ async sendNotificationToDriver(driverUid: string, title: string, message: string
     }
   } else {
     console.warn('Token FCM du livreur introuvable.');
+  }
+}
+
+async loadCommandeAndDriver(commandeId: string) {
+  try {
+    const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
+    const commandeSnap = await getDoc(commandeRef);
+
+    if (!commandeSnap.exists()) {
+      console.warn('Commande introuvable');
+      return;
+    }
+
+    const commandeData = commandeSnap.data() as any;
+
+    // Charger les infos du trajet
+    this.trajet.Depart = commandeData.depart;
+    this.trajet.Destination = commandeData.destination;
+    this.trajet.Distance = commandeData.distance;
+    this.trajet.Duree = commandeData.duree;
+    this.trajet.Prix = commandeData.prix;
+
+    // Charger les infos du chauffeur
+    if (commandeData.driverId) {
+      const driverRef = doc(this.firestore, `drivers/${commandeData.driverId}`);
+      const driverSnap = await getDoc(driverRef);
+      if (driverSnap.exists()) {
+        this.driver = driverSnap.data();
+      }
+    }
+
+  } catch (err) {
+    console.error('Erreur chargement commande + chauffeur :', err);
   }
 }
 

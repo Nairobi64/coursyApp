@@ -5,6 +5,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule,FormsModule } from '@angular/forms';
+import { Auth } from '@angular/fire/auth';
+import { Firestore, collection, addDoc, getDoc, doc, serverTimestamp } from '@angular/fire/firestore';
+import { AlertController } from '@ionic/angular';
+
 
 declare var google: any;
 
@@ -33,6 +37,9 @@ export class CommandeComponent  implements OnInit {
 
   constructor(private fb: FormBuilder, 
               private router: Router,
+              private auth: Auth,
+              private firestore : Firestore,
+              private AlertController : AlertController
              ) {}
 
   ngOnInit() {
@@ -98,43 +105,101 @@ export class CommandeComponent  implements OnInit {
 }
 
 
-  onSubmit() {
-    this.formSubmitted = true;
+  async onSubmit() {
+  this.formSubmitted = true;
 
-    if (this.commandeForm.invalid) return;
+  if (this.commandeForm.invalid) return;
 
-    const { depart, destination } = this.commandeForm.value;
+  const { depart, destination } = this.commandeForm.value;
 
-    const directionsService = new google.maps.DirectionsService();
+  const directionsService = new google.maps.DirectionsService();
 
-    directionsService.route(
-      {
-        origin: depart,
-        destination: destination,
-        travelMode: google.maps.TravelMode.DRIVING
-      },
-      (result: any, status: any) => {
-        if (status === 'OK') {
-          const leg = result.routes[0].legs[0];
-          const distance = parseFloat((leg.distance.value / 1000).toFixed(2)); // km
-          const duree = Math.round(leg.duration.value / 60); // min
-          const prix = Math.round(distance * 200); // exemple : 200 FCFA/km
+  directionsService.route(
+    {
+      origin: depart,
+      destination: destination,
+      travelMode: google.maps.TravelMode.DRIVING
+    },
+    async (result: any, status: any) => {
+      if (status === 'OK') {
+        const leg = result.routes[0].legs[0];
+        const distance = parseFloat((leg.distance.value / 1000).toFixed(2)); // km
+        const duree = Math.round(leg.duration.value / 60); // min
+        const prix = Math.round(distance * 200); // exemple : 200 FCFA/km
 
-          this.router.navigate(['/user/trajet'], {
-            queryParams: {
-              depart,
-              destination,
-              distance,
-              duree,
-              prix
-            }
-          });
-        } else {
-          this.errorMessage = 'Erreur lors de la récupération du trajet.';
-        }
+        // Affiche la popup avec les infos récap
+        const alert = await this.AlertController.create({
+          header: 'Confirmez votre commande',
+          message: `
+            <div style="text-align:left; font-size: 16px; line-height: 1.4;">
+            <p><strong>📍 Départ :</strong><br> ${depart}</p>
+            <p><strong>🏁 Destination :</strong><br> ${destination}</p>
+            <p><strong>🛣️ Distance estimée :</strong><br> ${distance} km</p>
+            <p><strong>⏱️ Durée estimée :</strong><br> ${duree} min</p>
+            <p><strong>💰 Prix estimé :</strong><br> ${prix} FCFA</p>
+          </div>
+          `,
+          buttons: [
+    {
+      text: 'Annuler',
+      role: 'cancel',
+      cssClass: 'alert-button-cancel'
+    },
+    {
+      text: 'Valider',
+      cssClass: 'alert-button-validate',
+      handler: () => this.confirmCommande(depart, destination, distance, duree, prix)
+    }
+  ],
+  cssClass: 'custom-alert'
+        });
+        await alert.present();
+
+      } else {
+        this.errorMessage = 'Erreur lors de la récupération du trajet.';
       }
-    );
+    }
+  );
+}
+
+
+async confirmCommande(depart: string, destination: string, distance: number, duree: number, prix: number) {
+  const user = this.auth.currentUser;
+  if (!user) {
+    this.errorMessage = 'Utilisateur non connecté.';
+    return;
   }
+
+  const commande = {
+    uid: user.uid,
+    createdAt: serverTimestamp(),
+    depart,
+    destination,
+    distance,
+    duree,
+    prix,
+    statut: 'en attente',
+    service: 'taxi'
+  };
+
+  try {
+    // Enregistrer commande dans Firestore
+    const commandesRef = collection(this.firestore, 'commandes');
+    const docRef = await addDoc(commandesRef, commande);
+
+    console.log('Commande enregistrée avec ID:', docRef.id);
+
+    // Naviguer vers la page trajet en passant l’ID de commande
+    this.router.navigate(['/user/trajet'], {
+      queryParams: { commandeId: docRef.id }
+    });
+
+  } catch (err) {
+    console.error('Erreur lors de la création de la commande :', err);
+    this.errorMessage = 'Impossible d’enregistrer la commande.';
+  }
+}
+
 
   goToResto() {
     this.router.navigate(['/restaurant/menu']);

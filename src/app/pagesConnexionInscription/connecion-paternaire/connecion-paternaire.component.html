@@ -1,0 +1,26 @@
+<div class="login-container">
+  <div class="tab-buttons">
+    <button [class.active]="activeTab === 'drivers'" (click)="activeTab = 'drivers'">Chauffeur</button>
+    <button [class.active]="activeTab === 'livreur'" (click)="activeTab = 'livreur'">Livreur</button>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
+    <h2>Connexion {{ activeTab | titlecase }}</h2>
+
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input type="email" formControlName="email"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Mot de passe</ion-label>
+      <ion-input type="password" formControlName="password"></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid || loading">
+      Se connecter
+    </ion-button>
+  </form>
+
+  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+</div>

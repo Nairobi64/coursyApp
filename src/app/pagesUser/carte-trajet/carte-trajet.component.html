@@ -37,26 +37,26 @@
     </ion-card>
 
     <!-- Profil chauffeur/livreur -->
-    <ion-card class="driver-card">
-      <ion-card-content>
-        <div class="driver-info">
-         
-          <div>
-            <div class="driver-name">{{ driver.nom }} {{ driver.prenom }}</div>
-            <div class="driver-role">{{ driver.role | titlecase }}</div>
-          </div>
-        </div>
-        <div class="driver-actions">
-          <ion-button color="primary" (click)="callDriver()">
-            <ion-icon name="call-outline" slot="start"></ion-icon>
-            Appeler
-          </ion-button>
-          <ion-button color="secondary" (click)="messageDriver()">
-            <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-            Message
-          </ion-button>
-        </div>
-      </ion-card-content>
-    </ion-card>
+<ion-card class="driver-card" *ngIf="driver">
+  <ion-card-content>
+    <div class="driver-info">
+      <div>
+        <div class="driver-name">{{ driver.nom }} {{ driver.prenom }}</div>
+        <div class="driver-role">{{ driver.role | titlecase }}</div>
+      </div>
+    </div>
+    <div class="driver-actions">
+      <ion-button color="primary" (click)="callDriver()">
+        <ion-icon name="call-outline" slot="start"></ion-icon>
+        Appeler
+      </ion-button>
+      <ion-button color="secondary" (click)="messageDriver()">
+        <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+        Message
+      </ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>
+
   </div>
 </ion-content>

@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Profil Livreur</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-item>
+    <ion-label>Disponible</ion-label>
+    <ion-toggle [checked]="disponible" (ionChange)="toggleDisponibilite($event)"></ion-toggle>
+  </ion-item>
+
+  <ion-card *ngIf="coursesAcceptees$ | async as coursesAcceptees">
+    <ion-card-header>
+      <ion-card-title>Courses Acceptées</ion-card-title>
+    </ion-card-header>
+    <ion-list>
+      <ion-item *ngFor="let course of coursesAcceptees">
+        {{ course.depart || 'N/A' }} → {{ course.arrivee || 'N/A' }}
+      </ion-item>
+      <ion-item *ngIf="coursesAcceptees.length === 0">Aucune course acceptée.</ion-item>
+    </ion-list>
+  </ion-card>
+
+  <ion-card *ngIf="coursesRefusees$ | async as coursesRefusees">
+    <ion-card-header>
+      <ion-card-title>Courses Refusées</ion-card-title>
+    </ion-card-header>
+    <ion-list>
+      <ion-item *ngFor="let course of coursesRefusees">
+        {{ course.depart || 'N/A' }} → {{ course.arrivee || 'N/A' }}
+      </ion-item>
+      <ion-item *ngIf="coursesRefusees.length === 0">Aucune course refusée.</ion-item>
+    </ion-list>
+  </ion-card>
+
+</ion-content>

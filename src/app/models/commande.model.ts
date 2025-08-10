@@ -1,15 +1,16 @@
-export interface CommandeUser {
-  id: string; // identifiant de l’utilisateur connecté
+export interface Commande {
+  uid: string;
+  createdAt: any;
   depart: string;
   destination: string;
   distance: number;
   duree: number;
   prix: number;
-  createdAt: Date;
-  statut: 'en attente' | 'en cours' | 'terminée' | 'annulée';
-  service: 'taxi' | 'livraison' ;
-  driver?: {
-    nom: string;
+  statut: 'en attente' | 'prise en charge' | 'terminée';
+  chauffeur?: {
+    uid: string;
+    prenom: string;
     photoURL: string;
+    telephone: string;
   };
 }

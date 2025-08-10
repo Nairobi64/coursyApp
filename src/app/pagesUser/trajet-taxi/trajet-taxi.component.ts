@@ -85,7 +85,7 @@ export class TrajetTaxiComponent implements OnInit {
     try {
       await addDoc(collection(this.firestore, 'commandes'), data);
       alert('Votre commande a été envoyée. Un chauffeur va la prendre en charge.');
-      this.router.navigate(['/user/histoUser']);
+      this.router.navigate(['/user/trajet']);
     } catch (error) {
       console.error('Erreur lors de l’enregistrement :', error);
       alert('Une erreur est survenue. Veuillez réessayer.');

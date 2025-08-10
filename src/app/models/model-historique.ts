@@ -1,7 +1,7 @@
-export interface Historique {
-  id: string;
-  type: 'commande' | 'course' | 'livraison';
-  entiteId: string; // utilisateur, chauffeur, livreur, restaurant
-  date: Date;
-  details: any;
+interface Historique {
+  depart: string;
+  destination: string;
+  statut: 'en attente' | 'acceptée' | 'refusée' | 'prise en charge' | 'terminée';
+  date: string;
+  prix: number;
 }

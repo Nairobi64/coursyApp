@@ -1,159 +1,175 @@
-import { Injectable } from '@angular/core';import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut ,onAuthStateChanged} from '@angular/fire/auth';
-import { doc, Firestore, setDoc , getDoc } from '@angular/fire/firestore';
+import { Injectable } from '@angular/core';
+import {Auth,createUserWithEmailAndPassword,signInWithEmailAndPassword,updateProfile,signOut,UserCredential} from '@angular/fire/auth';
+import {Firestore, doc, setDoc, getDoc,docData} from '@angular/fire/firestore';
+import { Observable, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthServiceService {
-
-   constructor(
+export class AuthService {
+  constructor(
     private auth: Auth,
     private firestore: Firestore,
-    private router: Router,
+    private router: Router
   ) {}
 
+  // =========================
+  // INSCRIPTION UTILISATEUR
+  // =========================
+  async registerUser(email: string, password: string, prenom: string, role: string, photoUrl?: string) {
+    const cred = await createUserWithEmailAndPassword(this.auth, email, password);
+    const userRef = doc(this.firestore, `users/${cred.user.uid}`);
 
-    listenUserProfile() {
-    onAuthStateChanged(this.auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-        let userDoc = doc(this.firestore, `users/${uid}`);
-        let snap = await getDoc(userDoc);
-
-        if (!snap.exists()) {
-          userDoc = doc(this.firestore, `drivers/${uid}`);
-          snap = await getDoc(userDoc);
-        }
-
-        if (snap.exists()) {
-          const userData = snap.data() as any;
-          localStorage.setItem('currentUser', JSON.stringify({
-            uid,
-            role: userData.role,
-            prenom: userData.prenom,
-            nom: userData.nom,
-            email: userData.email
-          }));
-        }
-      } else {
-        localStorage.removeItem('currentUser');
-      }
+    await setDoc(userRef, {
+      uid: cred.user.uid,
+      email,
+      prenom,
+      role: role.trim().toLowerCase(),
+      photoUrl: photoUrl || null,
+      createdAt: new Date()
     });
+
+    return cred;
   }
-  
 
+  // =========================
+  // CONNEXION UTILISATEUR
+  // =========================
+  async loginUser(email: string, password: string) {
+    const cred = await signInWithEmailAndPassword(this.auth, email, password);
+    const userRef = doc(this.firestore, `users/${cred.user.uid}`);
+    const snap = await getDoc(userRef);
 
-  async register(email: string, password: string, userData: any): Promise<void> {
-  try {
+    if (snap.exists()) {
+      const data = snap.data() as any;
+      const role = (data.role || 'users').trim().toLowerCase();
+
+      localStorage.setItem('currentUser', JSON.stringify(data));
+      this.redirectAfterLogin(role);
+    } else {
+      console.warn('Utilisateur non trouvé dans Firestore');
+    }
+
+    return cred;
+  }
+
+  // =========================
+  // INSCRIPTION CHAUFFEUR / LIVREUR
+  // =========================
+
+  async register(email: string, password: string, userData: any): Promise<UserCredential> {
     const credentials = await createUserWithEmailAndPassword(this.auth, email, password);
     const uid = credentials.user.uid;
 
-      const role = userData.role || 'user';
-      const collection = role === 'driver' ? 'drivers' : 'users';
+    await updateProfile(credentials.user, { displayName: userData.prenom });
 
-    await setDoc(doc(this.firestore, collection, uid), {
-        uid,
-        email,
-        ...userData,
-        createdAt: new Date()
-      });
-
-      // 🔁 Redirection selon le rôle (optionnel ici)
-      if (role === 'driver') {
-        this.router.navigate(['/profile']);
-      } else {
-        this.router.navigate(['/user/commande']);
-      }
-
-    } catch (error: any) {
-      console.error('Erreur lors de l’enregistrement :', error);
-      throw error;
+    const role = (userData.role || '').trim().toLowerCase();
+    if (role !== 'drivers' && role !== 'livreurs') {
+      throw new Error('Rôle invalide');
     }
+
+    const collectionName = role === 'drivers' ? 'drivers' : 'livreurs';
+
+    await setDoc(doc(this.firestore, `${collectionName}/${uid}`), {
+      uid,
+      email,
+      role,
+      disponible: false,
+      ...userData,
+      createdAt: new Date()
+    });
+
+    localStorage.setItem('currentUser', JSON.stringify({
+      uid,
+      email,
+      role,
+      prenom: userData.prenom,
+      nom: userData.nom
+    }));
+
+    this.redirectAfterLogin(role);
+    return credentials;
   }
 
-redirectAfterLogin(role: string): void {
-  if (role === 'user') {
-    this.router.navigate(['/user/commande']);
-  } else if (role === 'driver') {
-    this.router.navigate(['/driver/profile']);
-  } else {
-    this.router.navigate(['/indisponible']);
-  }
-}
-
-
-
-
-getCurrentUser() {
-  const userData = localStorage.getItem('user');
-  return userData ? JSON.parse(userData) : null;
-}
-
-
-getCurrentUserData() {
-  const userData = localStorage.getItem('currentUser');
-  return userData ? JSON.parse(userData) : null;
-}
-
-logout() {
-  signOut(this.auth).then(() => {
-    localStorage.removeItem('currentUser');
-    this.router.navigate(['/login-user']);
-  });
-}
-
-
-
-  async login(email: string, password: string) {
-  try {
+  // =========================
+  // CONNEXION CHAUFFEUR / LIVREUR
+  // =========================
+  async login(email: string, password: string): Promise<UserCredential> {
     const credentials = await signInWithEmailAndPassword(this.auth, email, password);
     const uid = credentials.user.uid;
 
-    // 🔍 Cherche dans 'users' puis dans 'drivers'
-    let userDoc = doc(this.firestore, `users/${uid}`);
-    let snap = await getDoc(userDoc);
+    // Recherche dans les deux collections
+    const driverRef = doc(this.firestore, `drivers/${uid}`);
+    const livreurRef = doc(this.firestore, `livreurs/${uid}`);
+
+    let snap = await getDoc(driverRef);
+    let role = 'drivers';
 
     if (!snap.exists()) {
-      userDoc = doc(this.firestore, `drivers/${uid}`);
-      snap = await getDoc(userDoc);
+      snap = await getDoc(livreurRef);
+      role = 'livreurs';
     }
 
-    if (!snap.exists()) {
-      throw new Error("Aucun profil trouvé dans Firestore.");
+    if (snap.exists()) {
+      const data = snap.data() as any;
+      localStorage.setItem('currentUser', JSON.stringify(data));
+      this.redirectAfterLogin(role);
+    } else {
+      console.warn('Profil non trouvé dans Firestore');
     }
 
-    const userData = snap.data() as any;
+    return credentials;
+  }
 
-    // 🧠 Stocker l'utilisateur dans le localStorage
-    localStorage.setItem('currentUser', JSON.stringify({
-      uid,
-      role: userData.role,
-      prenom: userData.prenom,
-      nom: userData.nom,
-      email: userData.email
-    }));
+  // =========================
+  // PROFIL UTILISATEUR
+  // =========================
+  getCurrentUser() {
+    const data = localStorage.getItem('currentUser');
+    return data ? JSON.parse(data) : null;
+  }
 
-    // ✅ Redirection par rôle
-    switch (userData.role) {
-      case 'user':
-        this.router.navigate(['/user/home']);
+  getUserProfile(uid: string, collectionName: 'drivers' | 'livreurs'): Observable<any> {
+    return docData(doc(this.firestore, `${collectionName}/${uid}`));
+  }
+
+  async getUserProfileOnce(uid: string, collectionName: 'drivers' | 'livreurs'): Promise<any> {
+    return firstValueFrom(this.getUserProfile(uid, collectionName));
+  }
+
+  // =========================
+  // REDIRECTION SELON RÔLE
+  // =========================
+  redirectAfterLogin(role: string) {
+    role = (role || '').trim().toLowerCase();
+
+    switch (role) {
+      case 'drivers':
+        this.router.navigate(['/driver/profile']);
         break;
-      case 'driver':
-        this.router.navigate(['/driver-profil']);
+      case 'livreurs':
+        this.router.navigate(['/livreur/profile']);
+        break;
+      case 'users':
+        this.router.navigate(['/user/commande']);
         break;
       case 'admin':
-        this.router.navigate(['/admin-dashboard']);
+        this.router.navigate(['/admin/dashboard']);
         break;
       default:
-        throw new Error("Rôle non reconnu");
+        this.router.navigate(['/indisponible']);
     }
+    console.log('Redirection avec rôle :', role);
 
-  } catch (error: any) {
-    console.error("Erreur de connexion :", error);
-    throw error;
   }
-}
 
-
+  // =========================
+  // DÉCONNEXION
+  // =========================
+  async logout() {
+    await signOut(this.auth);
+    localStorage.removeItem('currentUser');
+    this.router.navigate(['/login']);
+  }
 }

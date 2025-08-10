@@ -12,6 +12,7 @@ interface Course {
   date: string;
   prix: number;
   chauffeurId?: string;
+  driverId?: string;
 }
 
 @Component({
@@ -25,13 +26,17 @@ export class ListeCoursesComponent implements OnInit {
 
   commandesEnAttente: { id: string, data: Course }[] = [];
 
-  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {}
+  constructor(
+    private firestore: Firestore,
+    private auth: Auth,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     const q = query(
       collection(this.firestore, 'commandes'),
       where('statut', '==', 'en attente'),
-      where('service', '==', 'taxi') // à adapter pour les livreurs si besoin
+      where('service', '==', 'taxi') // adapte si besoin pour livreur
     );
 
     onSnapshot(q, snapshot => {
@@ -44,20 +49,27 @@ export class ListeCoursesComponent implements OnInit {
 
   async accepterCommande(commandeId: string) {
     const user = this.auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      alert('Utilisateur non connecté.');
+      return;
+    }
 
     const courseRef = doc(this.firestore, 'commandes', commandeId);
     await updateDoc(courseRef, {
       statut: 'acceptée',
-      chauffeurId: user.uid
+      chauffeurId: user.uid,
+      driverId: user.uid // 🔁 Ce champ sera utilisé pour l'affichage sur carte-trajet
     });
 
-    alert('Commande acceptée.');
+    alert('✅ Commande acceptée.');
   }
 
   async refuserCommande(commandeId: string) {
     const user = this.auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      alert('Utilisateur non connecté.');
+      return;
+    }
 
     const courseRef = doc(this.firestore, 'commandes', commandeId);
     await updateDoc(courseRef, {
@@ -65,7 +77,7 @@ export class ListeCoursesComponent implements OnInit {
       chauffeurId: user.uid
     });
 
-    alert('Commande refusée.');
+    alert('❌ Commande refusée.');
   }
 
   goBack() {

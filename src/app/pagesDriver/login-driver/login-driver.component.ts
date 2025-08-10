@@ -50,7 +50,8 @@ export class LoginDriverComponent  implements OnInit {
 
       if (docSnap.exists()) {
         const driverData = docSnap.data();
-        localStorage.setItem('user', JSON.stringify(driverData));
+        localStorage.setItem('user', JSON.stringify({ uid, ...driverData }));
+
 
         // ✅ Redirection selon le rôle
         this.authService.redirectAfterLogin(driverData['role']);

@@ -1,6 +1,6 @@
 <div class="register-container">
   <div class="register-box">
-    <h2>Partenaire</h2>
+    <h2>Partenaires</h2>
 
     <form [formGroup]="registerForm" (ngSubmit)="register()">
       <div class="form-group">
@@ -27,6 +27,26 @@
         <label for="email">Email</label>
         <input type="email" id="email" formControlName="email" required />
       </div>
+
+      <ion-select formControlName="role" placeholder="Choisir un rôle">
+  <ion-select-option value="chauffeur">Chauffeur</ion-select-option>
+  <ion-select-option value="livreur">Livreur</ion-select-option>
+  </ion-select>
+
+    <ion-item>
+      <ion-label position="floating">Matricule</ion-label>
+      <ion-input formControlName="matricule"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Marque</ion-label>
+      <ion-input formControlName="marque"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Couleur</ion-label>
+      <ion-input formControlName="couleur"></ion-input>
+    </ion-item>
 
       <div class="form-group">
         <label for="password">Mot de passe</label>

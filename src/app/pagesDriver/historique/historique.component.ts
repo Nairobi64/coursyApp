@@ -5,13 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
 
-interface Course {
+interface Historique {
   depart: string;
   destination: string;
-  statut: 'en attente' | 'acceptée' | 'refusée';
+  statut: 'en attente' | 'acceptée' | 'refusée' | 'prise en charge' | 'terminée';
   date: string;
   prix: number;
-  chauffeurId?: string;
 }
 
 @Component({
@@ -23,10 +22,12 @@ interface Course {
 })
 export class HistoriqueComponent implements OnInit {
 
-  courses: Course[] = [];
-  filteredCourses: Course[] = [];
+  historique: Historique[] = [];
+  filtered: Historique[] = [];
   filter = 'tous';
   totalGain: number = 0;
+
+  userRole: 'chauffeur' | 'livreur' = 'chauffeur'; // Tu peux adapter ça dynamiquement si besoin
 
   constructor(private auth: Auth, private firestore: Firestore) {}
 
@@ -34,30 +35,50 @@ export class HistoriqueComponent implements OnInit {
     const user = this.auth.currentUser;
     if (!user) return;
 
-    const q = query(
-      collection(this.firestore, 'commandes'),
-      where('chauffeurId', '==', user.uid)
-    );
+    let q;
+
+    if (this.userRole === 'chauffeur') {
+      q = query(collection(this.firestore, 'commandes'), where('chauffeur.uid', '==', user.uid));
+    } else {
+      q = query(collection(this.firestore, 'courses'), where('livreur.uid', '==', user.uid));
+    }
 
     const snapshot = await getDocs(q);
-    this.courses = snapshot.docs.map(doc => doc.data() as Course);
+    this.historique = snapshot.docs.map(doc => {
+  const data = doc.data() as any; // ou as Commande ou Course selon le cas
+
+  return {
+    depart: data.depart,
+    destination: data.destination,
+    statut: data.statut || data.status,
+    date: data.date || data.createdAt?.toDate()?.toISOString() || '',
+    prix: data.prix,
+  };
+});
+
 
     this.applyFilter();
   }
 
   applyFilter() {
     if (this.filter === 'tous') {
-      this.filteredCourses = this.courses;
+      this.filtered = this.historique;
     } else {
-      this.filteredCourses = this.courses.filter(c => c.statut === this.filter);
+      this.filtered = this.historique.filter(c => c.statut === this.filter);
     }
 
-    this.totalGain = this.filteredCourses.reduce((total, course) => {
-      return total + this.getGain(course);
+    this.totalGain = this.filtered.reduce((total, item) => {
+      return total + this.getGain(item);
     }, 0);
   }
 
-  getGain(course: Course): number {
-    return course.statut === 'acceptée' ? course.prix * 0.2 : 0;
+  getGain(item: Historique): number {
+    // Ici tu peux adapter selon la logique : gain si acceptée ou terminée
+    return (item.statut === 'acceptée' || item.statut === 'terminée') ? item.prix * 0.2 : 0;
   }
+
+  filteredCourses(): Historique[] {
+    return this.filtered;
+  }
+ 
 }
