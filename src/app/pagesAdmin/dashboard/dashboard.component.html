@@ -1,0 +1,46 @@
+<!-- dashboard-admin.component.html -->
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2>Call-Coursy</h2>
+    <nav>
+      <a (click)="afficherListe('utilisateurs')">👥 Utilisateurs</a>
+      <a (click)="afficherListe('chauffeurs')">🚖 Chauffeurs</a>
+      <a (click)="afficherListe('livreurs')">📦 Livreurs</a>
+    </nav>
+
+    <div>
+      <nav>
+        <a routerLink="/login-admin" routerLinkActive="active">Déconnexion</a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <header>
+      <h1>Tableau de bord</h1>
+    </header>
+
+    <!-- Cards -->
+    <section class="cards">
+      <div class="card" (click)="afficherListe('utilisateurs')">
+        <h3>Utilisateurs inscrits</h3>
+        <p>{{ (utilisateurs$ | async)?.length }}</p>
+      </div>
+      <div class="card" (click)="afficherListe('chauffeurs')">
+        <h3>Chauffeurs inscrits</h3>
+        <p>{{ (chauffeurs$ | async)?.length }}</p>
+      </div>
+      <div class="card" (click)="afficherListe('livreurs')">
+        <h3>Livreurs inscrits</h3>
+        <p>{{ (livreurs$ | async)?.length }}</p>
+      </div>
+    </section>
+
+    <!-- Listes dynamiques -->
+    <app-utilisateurs-liste *ngIf="listeActive === 'utilisateurs'"></app-utilisateurs-liste>
+    <app-chauffeurs-liste *ngIf="listeActive === 'chauffeurs'"></app-chauffeurs-liste>
+    <app-livreurs-liste *ngIf="listeActive === 'livreurs'"></app-livreurs-liste>
+  </main>
+</div>

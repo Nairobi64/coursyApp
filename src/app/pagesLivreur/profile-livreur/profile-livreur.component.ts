@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { collectionData } from 'rxfire/firestore';
 import { Observable } from 'rxjs';
+import { onAuthStateChanged } from '@angular/fire/auth';
+
 import { AlertController } from '@ionic/angular/standalone';
 
 @Component({
@@ -30,7 +32,7 @@ uid: string = '';
   ) {}
 
   async ngOnInit() {
-    const user = this.auth.currentUser;
+   onAuthStateChanged(this.auth, async (user) => {
     if (!user) {
       console.error('Utilisateur non connecté');
       return;
@@ -49,17 +51,20 @@ uid: string = '';
       console.error('Erreur récupération disponibilité:', error);
     }
 
-    // Configurer les observables des courses acceptées/refusées
+    // Configurer les observables des courses une fois le uid connu
     this.loadCourses();
+  });
   }
 
-  loadCourses() {
-    const colAcceptees = query(
-      collection(this.firestore, 'courses'),
-      where('livreurId', '==', this.uid),
-      where('status', '==', 'acceptée')
-    );
-    this.coursesAcceptees$ = collectionData(colAcceptees, { idField: 'id' });
+ loadCourses() {
+  const colLivraison = query(
+    collection(this.firestore, 'livraison'),
+    where('livreurId', '==', this.uid),
+    where('statut', '==', 'prise en charge')
+  );
+  this.coursesAcceptees$ = collectionData(colLivraison, { idField: 'id' });
+
+
 
     const colRefusees = query(
       collection(this.firestore, 'courses'),

@@ -1,0 +1,14 @@
+<ion-content [fullscreen]="true" class="register-page">
+  <div class="overlay">
+    <div class="form-container">
+      <h1>Inscription Admin</h1>
+      <ion-input placeholder="Nom complet" [(ngModel)]="name"></ion-input>
+      <ion-input placeholder="Email" [(ngModel)]="email" type="email"></ion-input>
+      <ion-input placeholder="Mot de passe" [(ngModel)]="password" type="password"></ion-input>
+      <ion-button expand="block" color="warning" (click)="register()">Créer un compte</ion-button>
+      <p class="login-link">
+        Déjà un compte ? <a routerLink="/login-admin">Se connecter</a>
+      </p>
+    </div>
+  </div>
+</ion-content>

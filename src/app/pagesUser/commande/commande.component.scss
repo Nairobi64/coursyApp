@@ -69,31 +69,90 @@ img{
 
 
 
-
-
-
 // popup
 
 
-:host ::ng-deep .custom-alert .alert-message {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #222;
-  text-align: left;
-  font-size: 16px;
-  line-height: 1.4;
+/* Fond semi-transparent */
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 
-:host ::ng-deep .custom-alert .alert-button-cancel {
-  --background: #ccc;
-  --color: #333;
+/* Carte principale */
+.popup-card {
+  background: #fff;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 350px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: popupFadeIn 0.3s ease;
 }
 
-:host ::ng-deep .custom-alert .alert-button-validate {
-  --background: var(--ion-color-primary);
-  --color: #fff;
-  font-weight: bold;
+/* Animation */
+@keyframes popupFadeIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-:host ::ng-deep .custom-alert .alert-message p {
-  margin: 0.4em 0;
+/* Titre */
+.popup-title {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+/* Texte */
+.popup-message {
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  color: #555;
+}
+
+/* Boutons */
+.popup-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel {
+  background: #eee;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  background: #ddd;
+}
+
+.btn-confirm {
+  background: #ff7f00;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: #ff7f00;
+}
+
+.btn-confirm.active {
+  background: #4caf50;
+}
+
+.btn-confirm.active:hover {
+  background: #449d48;
 }

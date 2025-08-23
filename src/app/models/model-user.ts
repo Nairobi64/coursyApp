@@ -8,4 +8,5 @@ export interface Utilisateur {
   role: 'user';
   historiqueCommandes?: string[]; // IDs des commandes
   createdAt: Date;
+  online?: boolean;
 }

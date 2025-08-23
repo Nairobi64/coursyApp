@@ -1,0 +1,58 @@
+.register-page {
+  --background: url('https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=1950&q=80') no-repeat center center / cover;
+
+  .overlay {
+    background: rgba(0, 0, 0, 0.5);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 25px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: bold;
+  }
+
+  ion-input {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding-left: 10px;
+  }
+
+  ion-button {
+    --border-radius: 8px;
+    --box-shadow: none;
+    font-weight: bold;
+  }
+
+  .login-link {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #666;
+
+    a {
+      color: #ff8c00;
+      font-weight: bold;
+      text-decoration: none;
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

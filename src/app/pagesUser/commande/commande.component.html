@@ -12,7 +12,7 @@
  
     <!-- Titre principal -->
     <ion-card class="form-card ion-padding">
-     
+     <h3 style="color: #ff7f00;">Commander un coursier</h3>
 
       <form [formGroup]="commandeForm" (ngSubmit)="onSubmit()">
 
@@ -92,21 +92,12 @@
           </div>
         </ion-card>
 
-        <ion-card class="service-card livraison" color="light">
+        <ion-card class="service-card livraison" (click)="goToColis()" color="light">
           <ion-icon name="bicycle-outline" class="service-icon"></ion-icon>
           <div>
-            <span class="service-name">Livraison</span><br><br>
+            <span class="service-name">NosColis</span><br><br>
             <img src="assets/images/coursier.jpeg" alt="Taxi" class="service-img" />
-            <p class="service-desc">Envoyez ou recevez vos colis facilement.</p>
-          </div>
-        </ion-card>
-
-        <ion-card class="service-card resto" (click)="goToResto()" color="light">
-          <ion-icon name="restaurant-outline" class="service-icon"></ion-icon>
-          <div>
-            <span class="service-name">Restaurant</span><br><br>
-            <img src="assets/images/restau.jpeg" alt="Taxi" class="service-img" />
-            <p class="service-desc">Commandez vos plats préférés.</p>
+            <p class="service-desc">Envoyez et recevez vos colis de Dakar a Thies.</p>
           </div>
         </ion-card>
       </div>

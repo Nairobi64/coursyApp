@@ -1,0 +1,31 @@
+<ion-content [fullscreen]="true" class="admin-login-page">
+  <div class="overlay">
+    <div class="card">
+      <h1>Connexion Admin</h1>
+
+      <div class="inputs">
+        <ion-item lines="inset">
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" [(ngModel)]="email" autocapitalize="off"></ion-input>
+        </ion-item>
+
+        <ion-item lines="inset" class="mt-10">
+          <ion-label position="floating">Mot de passe</ion-label>
+          <ion-input type="password" [(ngModel)]="password"></ion-input>
+        </ion-item>
+      </div>
+
+      <ion-button expand="block" color="warning" class="mt-20" (click)="login()">
+        Se connecter
+      </ion-button>
+
+      <p class="small-note">
+        Si vous n'avez pas de compte admin, créez-en un sur la page d'inscription.
+      </p>
+
+      <div class="links">
+        <a routerLink="/register-admin">Créer un compte admin</a>
+      </div>
+    </div>
+  </div>
+</ion-content>

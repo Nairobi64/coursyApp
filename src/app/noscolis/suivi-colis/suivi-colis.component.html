@@ -1,0 +1,26 @@
+<!-- suivi-colis.component.html -->
+<div class="suivi-container">
+  <ion-buttons slot="start">
+    <ion-back-button defaultHref="/user/commande" text="Retour" icon="arrow-back-outline"></ion-back-button>
+  </ion-buttons> <br>
+  <h1 class="title">Suivi de colis</h1>
+
+  <ion-card class="suivi-card">
+    <ion-label position="stacked">Numéro de suivi</ion-label>
+    <ion-input [(ngModel)]="trackingNumber" placeholder="Entrez votre numéro de suivi"></ion-input>
+
+    <ion-button expand="block" color="warning" (click)="rechercherColis()" [disabled]="loading">
+      {{ loading ? 'Recherche...' : 'Rechercher' }}
+    </ion-button>
+  </ion-card>
+
+  <ion-card *ngIf="colis" class="result-card">
+    <h2>Informations du colis</h2>
+    <p><strong>Poids :</strong> {{ colis.poids }}</p>
+    <p><strong>Volume :</strong> {{ colis.volume }}</p>
+    <p><strong>Adresse :</strong> {{ colis.adresse }}</p>
+    <p><strong>Téléphone :</strong> {{ colis.telephone }}</p>
+    <p><strong>Statut :</strong> <span [ngStyle]="{'color': colis.statut === 'En attente' ? '#ff7f00' : 'green'}">{{ colis.statut }}</span></p>
+    <p><strong>Numéro de suivi :</strong> {{ colis.suivi }}</p>
+  </ion-card>
+</div>

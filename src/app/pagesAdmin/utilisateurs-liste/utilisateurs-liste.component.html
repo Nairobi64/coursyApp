@@ -1,0 +1,27 @@
+<div class="liste-utilisateurs">
+  <h2>Liste des utilisateurs</h2>
+  <p><strong>Connectés :</strong> {{ connectes$ | async }}</p>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of (utilisateurs$ | async)">
+        <td>{{ user.nom }}</td>
+        <td>{{ user.prenom }}</td>
+        <td>{{ user.email }}</td>
+        <td>
+          <span [style.color]="user.online ? 'green' : 'red'">
+            {{ user.online ? 'En ligne' : 'Hors ligne' }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

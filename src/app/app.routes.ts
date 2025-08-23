@@ -11,10 +11,12 @@ export const routes: Routes = [
 
 
   // Authentification
-  { path: 'connexion-partenaire', loadComponent: () => import('./pagesConnexionInscription/connecion-paternaire/connecion-paternaire.component').then(m => m.ConnecionPaternaireComponent) },
+  { path: 'login-driver', loadComponent: () => import('./pagesConnexionInscription/connecion-paternaire/connecion-paternaire.component').then(m => m.ConnecionPaternaireComponent) },
   { path: 'register-partenaire', loadComponent: () => import('./pagesConnexionInscription/inscription-partenaire/inscription-partenaire.component').then(m => m.InscriptionPartenaireComponent) },
   { path: 'login-user', loadComponent: () => import('./pagesUser/login-user/login-user.component').then(m => m.LoginUserComponent) },
   { path: 'register-user', loadComponent: () => import('./pagesUser/register-user/register-user.component').then(m => m.RegisterUserComponent) },
+  { path: 'register-admin', loadComponent: () => import('./pagesAdmin/register-admin/register-admin.component').then(m => m.RegisterAdminComponent) },
+  { path: 'login-admin', loadComponent: () => import('./pagesAdmin/login-admin/login-admin.component').then(m => m.LoginAdminComponent) },
 
 
   
@@ -34,6 +36,8 @@ export const routes: Routes = [
       {path: 'taxi',loadComponent:() => import ('./pagesUser/form-taxi/form-taxi.component').then(ma => ma.FormTaxiComponent)},
       {path: 'trajet-taxi',loadComponent:() => import ('./pagesUser/trajet-taxi/trajet-taxi.component').then(ma => ma.TrajetTaxiComponent)},
       {path: 'paiement',loadComponent:() => import ('./pagesUser/paiement/paiement.component').then(ma => ma.PaiementComponent)},
+      {path: 'noscolis',loadComponent:() => import ('./noscolis/noscolis-forms/noscolis-forms.component').then(ma => ma.NoscolisFormsComponent)},
+      {path: 'suivi',loadComponent:() => import ('./noscolis/suivi-colis/suivi-colis.component').then(ma => ma.SuiviColisComponent)},
 
 
     ],
@@ -67,6 +71,23 @@ export const routes: Routes = [
       // { path: 'historique', loadComponent: () => import('./pagesCourier/historique/historique.component').then(m => m.HistoriqueComponent) },
       { path: 'profile', loadComponent: () => import('./pagesLivreur/profile-livreur/profile-livreur.component').then(m => m.ProfileLivreurComponent) },
       
+    ]
+  },
+
+
+  // pages admin
+
+  {
+    path: 'admin',
+    // canActivate: [authGuard, roleGuard('livreur')],
+    // loadComponent: () => import('./layouts/courier-layout/courier-layout.component').then(m => m.CourierLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'administration', pathMatch: 'full' },
+      { path: 'utilisateurs', loadComponent: () => import('./pagesAdmin/utilisateurs-liste/utilisateurs-liste.component').then(m => m.UtilisateursListeComponent) },
+      { path: 'chauffeurs', loadComponent: () => import('./pagesAdmin/chauffeurs-liste/chauffeurs-liste.component').then(m => m.ChauffeursListeComponent) },
+      { path: 'dashboard', loadComponent: () => import('./pagesAdmin/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'livreurs', loadComponent: () => import('./pagesAdmin/livreurs-liste/livreurs-liste.component').then(m => m.LivreursListeComponent) },
+
     ]
   },
 

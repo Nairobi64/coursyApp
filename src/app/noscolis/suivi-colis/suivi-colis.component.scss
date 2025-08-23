@@ -1,0 +1,46 @@
+
+/* suivi-colis.component.scss */
+.suivi-container {
+  padding: 20px;
+  max-width: 500px;
+  margin: auto;
+
+  .title {
+    text-align: center;
+    color: #ff7f00;
+    margin-bottom: 20px;
+  }
+
+  .suivi-card {
+    padding: 20px;
+    border: 2px solid #ff7f00;
+    border-radius: 12px;
+    margin-bottom: 20px;
+
+    ion-input {
+      margin-bottom: 15px;
+    }
+
+    ion-button {
+      background-color: #ff7f00;
+      color: #fff;
+    }
+  }
+
+  .result-card {
+    padding: 20px;
+    border: 2px solid #ff7f00;
+    border-radius: 12px;
+    background-color: #fff9f0;
+
+    h2 {
+      color: #ff7f00;
+      margin-bottom: 15px;
+    }
+
+    p {
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+  }
+}

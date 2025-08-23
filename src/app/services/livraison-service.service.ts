@@ -1,58 +1,63 @@
-import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc, DocumentChange, DocumentData, QuerySnapshot } from '@angular/fire/firestore';
-import { Auth } from '@angular/fire/auth';
+import { Injectable } from '@angular/core';
+import { Firestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc } from '@angular/fire/firestore';
+import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
 import { AlertController } from '@ionic/angular';
-
-
+import { QuerySnapshot, DocumentData } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LivraisonServiceService {
- constructor(
+  private currentUser: User | null = null;
 
-  private Firestore :Firestore,
-  private AlertController : AlertController,
-  private auth: Auth
- ) {
-    this.listenToLivraisonCommandes();
-  }
-
-  async isLivreurDisponible(uid: string): Promise<boolean> {
-    const livreurRef = doc(this.Firestore, `livreurs/${uid}`);
-    const snap = await getDoc(livreurRef);
-    if (!snap.exists()) return false;
-    const data = snap.data();
-return data?.['disponible'] === true;  }
-
-  listenToLivraisonCommandes() {
-    const user = this.auth.currentUser;
-    if (!user) return;
-
-    const commandesRef = collection(this.Firestore, 'commandes');
-    const q = query(
-      commandesRef,
-      where('statut', '==', 'en attente'),
-      where('service', '==', 'livraison')
-    );
-
-    onSnapshot(q, async (snapshot: QuerySnapshot<DocumentData>) => {
-      for (const change of snapshot.docChanges()) {
-        if (change.type === 'added') {
-          const commande = change.doc.data();
-          const commandeId = change.doc.id;
-
-          const isDispo = await this.isLivreurDisponible(user.uid);
-          if (isDispo) {
-            this.promptCommandeLivreur(commande, commandeId);
-          }
-        }
+  constructor(
+    private firestore: Firestore,
+    private alertController: AlertController,
+    private auth: Auth
+  ) {
+    // On attend que Firebase donne l'utilisateur avant de commencer l'écoute
+    onAuthStateChanged(this.auth, (user) => {
+      this.currentUser = user;
+      if (user) {
+        this.listenToLivraisonCommandes();
       }
     });
   }
 
+  async isLivreurDisponible(uid: string): Promise<boolean> {
+    const livreurRef = doc(this.firestore, `livreurs/${uid}`);
+    const snap = await getDoc(livreurRef);
+    if (!snap.exists()) return false;
+    return snap.data()?.['disponible'] === true;
+  }
+
+  private listenToLivraisonCommandes() {
+  if (!this.currentUser) return;
+
+  const commandesRef = collection(this.firestore, 'livraison');
+  const q = query(
+    commandesRef,
+    where('statut', '==', 'en attente')
+  );
+
+  onSnapshot(q, async (snapshot: QuerySnapshot<DocumentData>) => {
+    for (const change of snapshot.docChanges()) {
+      if (change.type === 'added') {
+        const commande = change.doc.data();
+        const commandeId = change.doc.id;
+
+        const isDispo = await this.isLivreurDisponible(this.currentUser!.uid);
+        if (isDispo) {
+          this.promptCommandeLivreur(commande, commandeId);
+        }
+      }
+    }
+  });
+}
+
+
   private async promptCommandeLivreur(commande: any, commandeId: string) {
-    const alert = await this.AlertController.create({
+    const alert = await this.alertController.create({
       header: 'Nouvelle livraison',
       message: `
         <strong>Départ:</strong> ${commande.depart}<br>
@@ -65,14 +70,13 @@ return data?.['disponible'] === true;  }
         {
           text: 'Accepter',
           handler: async () => {
-            const user = this.auth.currentUser;
-            if (!user) return;
+            if (!this.currentUser) return;
 
-            const commandeRef = doc(this.Firestore, `commandes/${commandeId}`);
+            const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
             const snap = await getDoc(commandeRef);
 
             if (!snap.exists() || snap.data()?.['statut'] !== 'en attente') {
-              const info = await this.AlertController.create({
+              const info = await this.alertController.create({
                 header: 'Commande déjà prise',
                 message: `Cette livraison a déjà été acceptée.`,
                 buttons: ['OK']
@@ -84,9 +88,9 @@ return data?.['disponible'] === true;  }
             await updateDoc(commandeRef, {
               statut: 'prise en charge',
               livreur: {
-                uid: user.uid,
-                prenom: user.displayName || 'Livreur',
-                photoURL: user.photoURL || ''
+                uid: this.currentUser.uid,
+                prenom: this.currentUser.displayName || 'Livreur',
+                photoURL: this.currentUser.photoURL || ''
               }
             });
           }
@@ -96,11 +100,4 @@ return data?.['disponible'] === true;  }
 
     await alert.present();
   }
-
-
-
-  
-
-
-  
 }

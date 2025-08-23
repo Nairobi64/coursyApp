@@ -21,7 +21,7 @@
     cursor: pointer;
 
     &.active {
-      background: #3880ff;
+      background: #ff7f00;
       color: white;
     }
   }
@@ -33,7 +33,7 @@ h2 {
 }
 
 .error-message {
-  color: #f44336;
+  color: #ff7f00;
   text-align: center;
   margin-top: 10px;
 }

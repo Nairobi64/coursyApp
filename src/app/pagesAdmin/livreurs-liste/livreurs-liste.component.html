@@ -1,0 +1,19 @@
+<!-- liste-livreurs.page.html -->
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Liste des Livreurs</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h2>Total connectés : {{ onlineCount }}</h2>
+
+  <ion-list>
+    <ion-item *ngFor="let livreur of livreurs$ | async">
+      <ion-label>
+        <h3>{{ livreur.nom }}</h3>
+        <p>Email : {{ livreur.email }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

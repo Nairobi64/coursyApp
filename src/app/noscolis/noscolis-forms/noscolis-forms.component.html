@@ -1,0 +1,78 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-title style="color:#ff7f00; font-weight:bold;">📦 Enregistrement Colis</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <form [formGroup]="colisForm" (ngSubmit)="onSubmit()">
+
+    <!-- Expéditeur -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title style="color:#ff7f00;">Expéditeur</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Nom complet</ion-label>
+          <ion-input formControlName="expediteurNom"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Téléphone</ion-label>
+          <ion-input formControlName="expediteurTel" type="tel"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Adresse complète</ion-label>
+          <ion-input formControlName="expediteurAdresse"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Destinataire -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title style="color:#ff7f00;">Destinataire</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Nom complet</ion-label>
+          <ion-input formControlName="destinataireNom"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Téléphone</ion-label>
+          <ion-input formControlName="destinataireTel" type="tel"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Adresse complète</ion-label>
+          <ion-input formControlName="destinataireAdresse"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Infos Colis -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title style="color:#ff7f00;">Informations colis</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Description</ion-label>
+          <ion-input formControlName="description"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Poids (kg)</ion-label>
+          <ion-input formControlName="poids" type="number"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Valeur estimée (optionnel)</ion-label>
+          <ion-input formControlName="valeur" type="number"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button expand="block" type="submit" [disabled]="!colisForm.valid" style="--background:#ff7f00; margin-top:20px;">
+      Enregistrer Colis
+    </ion-button>
+  </form>
+</ion-content>
