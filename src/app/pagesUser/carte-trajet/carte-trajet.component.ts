@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Livreur } from '../../models/model-livreur';
+import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, LoadingController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { Trajet} from 'src/app/models/model-trajet';
-
-import { Firestore, collection, addDoc,getDoc, doc,serverTimestamp } from '@angular/fire/firestore';
-import { inject } from '@angular/core';
+import { Trajet } from 'src/app/models/model-trajet';
+import { Firestore, doc, onSnapshot } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
+import { CommandeService } from 'src/app/services/commande.service';
+import { LivraisonService } from 'src/app/services/livraison-service.service';
 
 declare var google: any;
 
@@ -15,219 +16,160 @@ declare var google: any;
   templateUrl: './carte-trajet.component.html',
   styleUrls: ['./carte-trajet.component.scss'],
   standalone: true,
-  imports: [ IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule]
 })
-export class CarteTrajetComponent  implements OnInit {
+export class CarteTrajetComponent implements OnInit, AfterViewInit {
+
   trajet: Trajet = {
     uid: '',
-  createdAt: new Date(),
-    Depart: '',
-    Destination: '',
-    Distance: 0,
-    Duree: 0,
-    Prix: 0
+    createdAt: new Date(),
+    depart: '',
+    destination: '',
+    distance: 0,
+    duree: 0,
+    prix: 0 
   };
 
+  commandeId: string | null = null;
+  Livreur: any = null;
+  loading: boolean = true; // Loader pendant l'attente
+  private map: any;
 
-   driver: any = null;
-
-  constructor(private route: ActivatedRoute,
-  ) {}
-
-   private firestore: Firestore = inject(Firestore);
+  private firestore: Firestore = inject(Firestore);
   private auth: Auth = inject(Auth);
 
+  constructor(private route: ActivatedRoute, 
+              private loadingCtrl: LoadingController,
+              private commandeService: CommandeService,
+              private livraisonService: LivraisonService
+  ) {}
+
   ngOnInit() {
-
     this.route.queryParams.subscribe(params => {
-      this.trajet.Depart = params['depart'] || '';
-      this.trajet.Destination = params['destination'] || '';
-      this.trajet.Distance = Number(params['distance']) || 0;
-      this.trajet.Duree = Number(params['duree']) || 0;
-      this.trajet.Prix = Number(params['prix']) || 0;
-    });
-
-    const user = this.auth.currentUser;
-    if (!user) {
-      console.error('Utilisateur non connecté');
-      return;
-    }
-
-
-    this.route.queryParams.subscribe(params => {
-    const commandeId = params['commandeId'];
-    if (commandeId) {
-      this.loadCommandeAndDriver(commandeId);
-    } else {
-      console.warn('ID de commande manquant');
-    }
-  });
-
-  }
-
-
- async saveCommandeToFirestore() {
-  const user = this.auth.currentUser;
-  if (!user) return;
-
-  const commande = {
-    uid: user.uid,
-    createdAt: serverTimestamp(),
-    depart: this.trajet.Depart,
-    destination: this.trajet.Destination,
-    distance: this.trajet.Distance,
-    duree: this.trajet.Duree,
-    prix: this.trajet.Prix,
-    statut: 'en attente', // 🔁 très important : doit correspondre à la requête du chauffeur
-    service: 'taxi' // 🔁 à ajouter si ton écoute côté chauffeur filtre sur ce champ
-  };
-
-  try {
-    // 🔁 Enregistrement dans l’historique de l’utilisateur
-    const historiqueRef = collection(this.firestore, `users/${user.uid}/historique`);
-    await addDoc(historiqueRef, commande);
-    console.log('✅ Commande ajoutée à l’historique');
-
-    // 🔁 Enregistrement dans la collection centrale "commandes"
-    const commandesRef = collection(this.firestore, 'commandes');
-    await addDoc(commandesRef, commande);
-    console.log('✅ Commande envoyée pour traitement aux chauffeurs');
-
-  } catch (err) {
-    console.error('❌ Erreur lors de la création de la commande :', err);
-  }
-}
-
-
-// pour les notifications
-
-async sendNotificationToDriver(driverUid: string, title: string, message: string) {
-  const tokenDoc = await getDoc(doc(this.firestore, `fcmTokens/${driverUid}`));
-
-  if (tokenDoc.exists()) {
-    const token = tokenDoc.data()['token'];
-
-    const payload = {
-      notification: {
-        title: title,
-        body: message
-      },
-      to: token
-    };
-
-    // 🔐 Clé secrète de ton projet Firebase
-    const serverKey = 'AAAA...'; // ⚠️ Mets ta clé serveur FCM ici, côté backend (jamais côté frontend en prod !)
-
-    try {
-      await fetch('https://fcm.googleapis.com/fcm/send', {
-        method: 'POST',
-        headers: {
-          'Authorization': `key=${serverKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      console.log('Notification envoyée');
-    } catch (err) {
-      console.error('Erreur notification :', err);
-    }
-  } else {
-    console.warn('Token FCM du livreur introuvable.');
-  }
-}
-
-async loadCommandeAndDriver(commandeId: string) {
-  try {
-    const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
-    const commandeSnap = await getDoc(commandeRef);
-
-    if (!commandeSnap.exists()) {
-      console.warn('Commande introuvable');
-      return;
-    }
-
-    const commandeData = commandeSnap.data() as any;
-
-    // Charger les infos du trajet
-    this.trajet.Depart = commandeData.depart;
-    this.trajet.Destination = commandeData.destination;
-    this.trajet.Distance = commandeData.distance;
-    this.trajet.Duree = commandeData.duree;
-    this.trajet.Prix = commandeData.prix;
-
-    // Charger les infos du chauffeur
-    if (commandeData.driverId) {
-      const driverRef = doc(this.firestore, `drivers/${commandeData.driverId}`);
-      const driverSnap = await getDoc(driverRef);
-      if (driverSnap.exists()) {
-        this.driver = driverSnap.data();
+      this.commandeId = params['commandeId'] || null;
+      if (this.commandeId) {
+        this.listenCommandeRealtime(this.commandeId);
+      } else {
+        console.warn('⚠️ ID de livraison manquant');
       }
-    }
-
-  } catch (err) {
-    console.error('Erreur chargement commande + chauffeur :', err);
-  }
-}
-
-
-
-
-
-ngAfterViewInit() {
-    if (this.trajet.Depart && this.trajet.Destination) {
-      this.initMap();
-    }
+    });
   }
 
-   initMap() {
+  ngAfterViewInit() {
+    // La carte sera initialisée après récupération du trajet
+  }
+
+  async listenCommandeRealtime(commandeId: string) {
+    const commandeRef = doc(this.firestore, `livraison/${commandeId}`);
+
+    onSnapshot(commandeRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        console.warn('⚠️ Livraison introuvable');
+        return;
+      }
+
+      const data = snapshot.data() as any;
+
+      // Charger les infos du trajet
+      this.trajet.depart = data.depart;
+      this.trajet.destination = data.destination;
+      this.trajet.distance = data.distance;
+      this.trajet.duree = data.duree;
+      this.trajet.prix = data.prix;
+
+      // Vérifier si un livreur a accepté
+      if (data.livreur) {
+        this.Livreur = data.livreur;
+        this.loading = false; // Stop le spinner dès qu'un livreur est affecté
+      } else {
+        this.Livreur = null;
+        this.loading = true;
+      }
+
+      // Initialiser la carte uniquement si depart et destination sont valides
+      if (this.trajet.depart && this.trajet.destination && !this.map) {
+        this.initMap();
+      } else if (!this.trajet.depart || !this.trajet.destination) {
+        console.warn('⚠️ Départ ou destination manquant pour Google Maps');
+      }
+    });
+  }
+
+  initMap() {
     const mapElement = document.getElementById('map');
     if (!mapElement) return;
-    const map = new google.maps.Map(mapElement, {
+
+    this.map = new google.maps.Map(mapElement, {
       zoom: 13,
-      center: { lat: 0, lng: 0 }
+      center: { lat: 14.6928, lng: -17.4467 } // Dakar par défaut
     });
 
     const directionsService = new google.maps.DirectionsService();
-    const directionsRenderer = new google.maps.DirectionsRenderer();
-    directionsRenderer.setMap(map);
+    const directionsRenderer = new google.maps.DirectionsRenderer({
+      map: this.map,
+      suppressMarkers: true
+    });
 
     directionsService.route(
       {
-        origin: this.trajet.Depart,
-        destination: this.trajet.Destination,
+        origin: this.trajet.depart,
+        destination: this.trajet.destination,
         travelMode: google.maps.TravelMode.DRIVING
       },
       (result: any, status: any) => {
         if (status === 'OK') {
           directionsRenderer.setDirections(result);
+
+          const bounds = new google.maps.LatLngBounds();
+          const route = result.routes[0].overview_path;
+          route.forEach((point: any) => bounds.extend(point));
+          this.map.fitBounds(bounds);
+
+          // Marqueurs départ et arrivée
+          const start = route[0];
+          const end = route[route.length - 1];
+
+          new google.maps.Marker({
+            position: start,
+            map: this.map,
+            title: 'Départ',
+            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+          });
+
+          new google.maps.Marker({
+            position: end,
+            map: this.map,
+            title: 'Destination',
+            icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+          });
+        } else {
+          console.error('Erreur DirectionsService', status);
         }
       }
     );
   }
-  
-  
-  async callDriver() {
-  await this.saveCommandeToFirestore(); // Enregistre dans Firestore
 
-  if (this.driver && this.driver.telephone) {
-    window.open(`tel:${this.driver.telephone}`);
-  } else {
-    console.warn('❌ Chauffeur introuvable ou numéro manquant');
+  async callLivreur() {
+    if (this.Livreur?.telephone) {
+      window.open(`tel:${this.Livreur.telephone}`);
+    }
   }
-}
 
-async messageDriver() {
-  await this.saveCommandeToFirestore(); // Enregistre dans Firestore
-
-  if (this.driver && this.driver.telephone) {
-    const phone = this.driver.telephone.replace('+', '').replace(/\s+/g, '');
-    const message = encodeURIComponent(`Bonjour ${this.driver.nom}, je suis votre client sur Call-coursy.`);
-    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-  } else {
-    console.warn('❌ Impossible d’envoyer un message : chauffeur inconnu');
+  async messageLivreur() {
+    if (this.Livreur?.telephone) {
+      const phone = this.Livreur.telephone.replace('+', '').replace(/\s+/g, '');
+      const message = encodeURIComponent(`Bonjour ${this.Livreur.nom}, je suis votre client sur Call-coursy.`);
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    }
   }
+
+  annulerCommande() {
+  if (!this.commandeId) return;
+  this.livraisonService.annulerLivraison(this.commandeId)
+    .then(res => {
+      if(res) console.log('Livraison annulée');
+    })
+    .catch(err => console.error('Erreur lors de l\'annulation :', err));
 }
-
-
 
 }

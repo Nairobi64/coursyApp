@@ -7,6 +7,8 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, addDoc, serverTimestamp } from '@angular/fire/firestore';
 import { AlertController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
+import { PopupCommandeComponent } from '../popup-commande/popup-commande.component';
 
 declare var google: any;
 
@@ -34,7 +36,7 @@ export class CommandeComponent implements OnInit {
     private router: Router,
     private auth: Auth,
     private firestore: Firestore,
-    private alertController: AlertController
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
@@ -97,69 +99,55 @@ export class CommandeComponent implements OnInit {
   }
 
   async onSubmit() {
-    this.formSubmitted = true;
+  this.formSubmitted = true;
 
-    if (this.commandeForm.invalid) return;
+  if (this.commandeForm.invalid) return;
 
-    const { depart, destination } = this.commandeForm.value;
+  const { depart, destination } = this.commandeForm.value;
 
-    const directionsService = new google.maps.DirectionsService();
+  const directionsService = new google.maps.DirectionsService();
 
-    directionsService.route(
-      {
-        origin: depart,
-        destination: destination,
-        travelMode: google.maps.TravelMode.DRIVING
-      },
-      async (result: any, status: any) => {
-        if (status === 'OK') {
-          const leg = result.routes[0].legs[0];
-          const distance = parseFloat((leg.distance.value / 1000).toFixed(2)); // km
-          const duree = Math.round(leg.duration.value / 60); // min
-          const prix = Math.round(distance * 200); // exemple : 200 FCFA/km
+  directionsService.route(
+    {
+      origin: depart,
+      destination: destination,
+      travelMode: google.maps.TravelMode.DRIVING
+    },
+    async (result: any, status: any) => {
+      if (status === 'OK') {
+        const leg = result.routes[0].legs[0];
+        const distance = parseFloat((leg.distance.value / 1000).toFixed(2)); // km
+        const duree = Math.round(leg.duration.value / 60); // min
+        const prix = Math.round(distance * 250); // exemple prix
 
-          // Affiche la popup avec les infos récap
-          const alert = await this.alertController.create({
-            header: 'Confirmez votre commande',
-            message: `
-              <div class="popup-backdrop" *ngIf="showPopup">
-                <div class="popup-card">
-                  <h2 class="popup-title">Disponibilité</h2>
-                  <p class="popup-message">
-                    Souhaitez-vous <strong>{{ disponible ? 'désactiver' : 'activer' }}</strong> votre disponibilité ?
-                  </p>
-                  <div class="popup-actions">
-                    <button class="btn btn-cancel" (click)="closePopup()">Annuler</button>
-                    <button 
-                      class="btn btn-confirm" 
-                      [class.active]="!disponible" 
-                      (click)="toggleDisponibilite()">
-                      Oui
-                    </button>
-                  </div>
-                </div>
-              </div>
-            `,
-            buttons: [
-              {
-                text: 'Annuler',
-                role: 'cancel',
-                cssClass: 'alert-button-cancel'
-              },
-              {
-                text: 'Valider',
-                cssClass: 'alert-button-validate',
-                handler: () => this.confirmCommande(depart, destination, distance, duree, prix)
-              }
-            ],
-            cssClass: 'custom-alert'
-          });
-          await alert.present();
-        } else {
-          this.errorMessage = 'Erreur lors de la récupération du trajet.';
+        // 👉 Ici, les variables sont bien définies
+        const modal = await this.modalCtrl.create({
+          component: PopupCommandeComponent,
+          componentProps: {
+            depart,
+            destination,
+            distance,
+            duree,
+            prix
+          },
+          breakpoints: [0, 0.6, 0.9],
+          initialBreakpoint: 0.6,
+          cssClass: 'commande-popup-modal'
+        });
+
+        await modal.present();
+
+        const { data, role } = await modal.onWillDismiss();
+
+        if (role === 'confirm' && data) {
+          this.confirmCommande(data.depart, data.destination, data.distance, data.duree, data.prix);
         }
+      } else {
+        this.errorMessage = 'Erreur lors de la récupération du trajet.';
       }
-    );
+    }
+  );
+
   }
 
   async confirmCommande(depart: string, destination: string, distance: number, duree: number, prix: number) {

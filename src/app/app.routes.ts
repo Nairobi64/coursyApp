@@ -12,7 +12,7 @@ export const routes: Routes = [
 
   // Authentification
   { path: 'login-driver', loadComponent: () => import('./pagesConnexionInscription/connecion-paternaire/connecion-paternaire.component').then(m => m.ConnecionPaternaireComponent) },
-  { path: 'register-partenaire', loadComponent: () => import('./pagesConnexionInscription/inscription-partenaire/inscription-partenaire.component').then(m => m.InscriptionPartenaireComponent) },
+  { path: 'register-driver', loadComponent: () => import('./pagesConnexionInscription/inscription-partenaire/inscription-partenaire.component').then(m => m.InscriptionPartenaireComponent) },
   { path: 'login-user', loadComponent: () => import('./pagesUser/login-user/login-user.component').then(m => m.LoginUserComponent) },
   { path: 'register-user', loadComponent: () => import('./pagesUser/register-user/register-user.component').then(m => m.RegisterUserComponent) },
   { path: 'register-admin', loadComponent: () => import('./pagesAdmin/register-admin/register-admin.component').then(m => m.RegisterAdminComponent) },
@@ -67,10 +67,11 @@ export const routes: Routes = [
     // loadComponent: () => import('./layouts/courier-layout/courier-layout.component').then(m => m.CourierLayoutComponent),
     children: [
       { path: '', redirectTo: 'livraisons', pathMatch: 'full' },
-      // { path: 'livraisons', loadComponent: () => import('./pagesCourier/livraisons/livraisons.component').then(m => m.LivraisonsComponent) },
-      // { path: 'historique', loadComponent: () => import('./pagesCourier/historique/historique.component').then(m => m.HistoriqueComponent) },
+      // { path: 'livraisons', loadComponent: () => import('./pagesLivreur/').then(m => m.LivraisonsComponent) },
+      { path: 'historique', loadComponent: () => import('./pagesLivreur/historique-livreur/historique-livreur.component').then(m => m.HistoriqueLivreurComponent) },
       { path: 'profile', loadComponent: () => import('./pagesLivreur/profile-livreur/profile-livreur.component').then(m => m.ProfileLivreurComponent) },
-      
+      { path: 'modif-livreur', loadComponent: () => import('./pagesLivreur/modif-livreur/modif-livreur.component').then(m => m.ModifLivreurComponent) },
+
     ]
   },
 

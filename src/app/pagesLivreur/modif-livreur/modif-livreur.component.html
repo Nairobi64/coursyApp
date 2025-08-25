@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-title>Modifier</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" style="font-size: 12px; margin: 10px;" (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+         Retour
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Mes Informations</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-list lines="full">
+        <ion-item>
+          <ion-label position="stacked">Prénom</ion-label>
+          <ion-input [(ngModel)]="livreurs.prenom" placeholder="Entrez votre prénom"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Nom</ion-label>
+          <ion-input [(ngModel)]="livreurs.nom" placeholder="Entrez votre nom"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Téléphone</ion-label>
+          <ion-input [(ngModel)]="livreurs.telephone" type="tel" placeholder="+221 77 000 00 00"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <ion-item>
+      <ion-label position="stacked">Nouveau mot de passe</ion-label>
+      <ion-input [(ngModel)]="newPassword" type="password" placeholder="Entrez un nouveau mot de passe"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Nouvel Email</ion-label>
+      <ion-input [(ngModel)]="newEmail" type="email" placeholder="exemple@mail.com"></ion-input>
+    </ion-item>
+
+
+      <ion-button color="warning" expand="block" class="ion-margin-top" (click)="updateProfile()">
+        Enregistrer les modifications
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

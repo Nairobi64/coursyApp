@@ -1,38 +1,95 @@
 <ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Profil Livreur</ion-title>
+  <ion-toolbar color="light">
+    <ion-title>Mon Profil Livreur</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="presentPopover($event)">
+        <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding driver-profile-container">
 
-  <ion-item>
-    <ion-label>Disponible</ion-label>
-    <ion-toggle [checked]="disponible" (ionChange)="toggleDisponibilite($event)"></ion-toggle>
-  </ion-item>
-
-  <ion-card *ngIf="coursesAcceptees$ | async as coursesAcceptees">
+  <!-- 🔔 Alerte nouvelle livraison -->
+  <ion-card *ngIf="nouvelleCourse && disponible" color="light" class="pulse-badge">
     <ion-card-header>
-      <ion-card-title>Courses Acceptées</ion-card-title>
+      <ion-card-title>🚨 Nouvelle livraison disponible</ion-card-title>
     </ion-card-header>
-    <ion-list>
-      <ion-item *ngFor="let course of coursesAcceptees">
-        {{ course.depart || 'N/A' }} → {{ course.arrivee || 'N/A' }}
-      </ion-item>
-      <ion-item *ngIf="coursesAcceptees.length === 0">Aucune course acceptée.</ion-item>
-    </ion-list>
+    <ion-card-content>
+      Une nouvelle livraison est prête à être prise en charge !  
+      <ion-button color="primary" expand="block" routerLink="/livreur/historique">
+        Voir la livraison
+      </ion-button>
+    </ion-card-content>
   </ion-card>
 
-  <ion-card *ngIf="coursesRefusees$ | async as coursesRefusees">
-    <ion-card-header>
-      <ion-card-title>Courses Refusées</ion-card-title>
-    </ion-card-header>
+  <!-- 👤 Profil livreur -->
+  <div class="profile-image-section">
+    <img [src]="profileImage || 'assets/images/coursier.jpeg'" alt="Profil" class="profile-img" />
+    <input type="file" id="fileInput" hidden (change)="onImageSelected($event)" />
+    <ion-button size="small" fill="clear" (click)="triggerFileInput()">
+      <ion-icon name="camera-outline"></ion-icon> Modifier
+    </ion-button>
+
+    <h2 class="driver-name">{{ livreurs.prenom }} {{ livreurs.nom }}</h2>
+    <p class="driver-city">{{ livreurs.ville }}</p>
+  </div>
+
+  <!-- ✅ Disponibilité -->
+  <div class="availability-section">
+    <ion-button 
+      [color]="disponible ? 'success' : 'medium'" 
+      (click)="toggleDisponibilite()" 
+      expand="block" 
+      class="availability-button">
+      {{ disponible ? 'Disponible pour livrer' : 'Indisponible' }}
+    </ion-button>
+  </div>
+
+  <!-- 📦 Bouton pour voir les livraisons -->
+  <ion-button expand="block" color="primary" [routerLink]="['/livreur/historique']">
+    📋 Voir l’historique des livraisons
+  </ion-button>
+
+  <!-- 📊 Résumé des courses -->
+  <div class="course-summary">
+    <ion-grid>
+      <ion-row>
+        <ion-col class="summary-box">
+          <h3>{{ acceptedCount }}</h3>
+          <p>Acceptées</p>
+        </ion-col>
+        <ion-col class="summary-box">
+          <h3>{{ refusedCount }}</h3>
+          <p>Refusées</p>
+        </ion-col>
+        <ion-col class="summary-box">
+          <h3>{{ totalCourses }}</h3>
+          <p>Total</p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- 🕓 Historique -->
+  <div class="history-section">
+    <h4>Historique des livraisons</h4>
     <ion-list>
-      <ion-item *ngFor="let course of coursesRefusees">
-        {{ course.depart || 'N/A' }} → {{ course.arrivee || 'N/A' }}
+      <ion-item *ngFor="let course of filteredCourses">
+        <ion-label>
+          <h5>{{ course.depart }} → {{ course.destination }}</h5>
+          <p>
+            <strong [style.color]="course.statut === 'acceptée' ? 'green' : 'red'">
+              {{ course.statut }}
+            </strong>
+            • 
+            <!-- Affiche date et heure formatées -->
+            {{ course.date?.toDate ? (course.date.toDate() | date:'dd/MM/yyyy HH:mm') : (course.date | date:'dd/MM/yyyy HH:mm') }}
+          </p>
+        </ion-label>
       </ion-item>
-      <ion-item *ngIf="coursesRefusees.length === 0">Aucune course refusée.</ion-item>
     </ion-list>
-  </ion-card>
+  </div>
 
 </ion-content>

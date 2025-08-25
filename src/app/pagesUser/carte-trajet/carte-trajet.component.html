@@ -1,62 +1,73 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar style="color:#ff7f00;">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
+    <ion-title>Votre trajet</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding" style="--background: #fff;">
   <div class="trajet-container">
-    <!-- Carte Google Map -->
+
+    <!-- Carte -->
     <div class="map-section">
-      <div id="map" style="width: 100%; height: 220px; border-radius: 18px;"></div>
+      <div id="map"></div>
+      <div [class.loader-visible]="loading && !Livreur" class="loader-overlay">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Recherche d’un livreur disponible...</p>
+      </div>
     </div>
 
     <!-- Infos trajet -->
-    <ion-card class="recap-card">
+    <ion-card class="recap-card card-anim" *ngIf="trajet && !loading">
       <ion-card-content>
         <div class="trajet-info">
           <div class="trajet-row">
             <ion-icon name="walk-outline"></ion-icon>
             <span>Distance :</span>
-            <span>{{ trajet.Distance }} km</span>
+            <span>{{ trajet.distance }} km</span>
           </div>
           <div class="trajet-row">
             <ion-icon name="time-outline"></ion-icon>
             <span>Durée estimée :</span>
-            <span>{{ trajet.Duree }} min</span>
+            <span>{{ trajet.duree }} min</span>
           </div>
           <div class="trajet-row">
             <ion-icon name="cash-outline"></ion-icon>
             <span>Prix :</span>
-            <span>{{ trajet.Prix }} FCFA</span>
+            <span>{{ trajet.prix }} FCFA</span>
           </div>
         </div>
       </ion-card-content>
     </ion-card>
 
-    <!-- Profil chauffeur/livreur -->
-<ion-card class="driver-card" *ngIf="driver">
-  <ion-card-content>
-    <div class="driver-info">
-      <div>
-        <div class="driver-name">{{ driver.nom }} {{ driver.prenom }}</div>
-        <div class="driver-role">{{ driver.role | titlecase }}</div>
-      </div>
-    </div>
-    <div class="driver-actions">
-      <ion-button color="primary" (click)="callDriver()">
-        <ion-icon name="call-outline" slot="start"></ion-icon>
-        Appeler
-      </ion-button>
-      <ion-button color="secondary" (click)="messageDriver()">
-        <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-        Message
-      </ion-button>
-    </div>
-  </ion-card-content>
-</ion-card>
+    <!-- Profil livreur -->
+    <ion-card class="driver-card card-anim" *ngIf="Livreur">
+      <ion-card-content>
+        <div class="driver-info">
+          <img *ngIf="Livreur.photoURL" [src]="Livreur.photoURL" alt="Photo du livreur" class="driver-photo">
+          <div class="driver-name-role">
+            <div class="driver-name">{{ Livreur.prenom }}</div>
+            <div class="driver-role">{{ Livreur.role | titlecase }}</div>
+          </div>
+        </div>
+        <div class="driver-actions">
+          <ion-button color="primary" (click)="callLivreur()">
+            <ion-icon name="call-outline" slot="start"></ion-icon>
+            Appeler
+          </ion-button>
+          <ion-button color="secondary" (click)="messageLivreur()">
+            <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+            Message
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button expand="full" color="danger" (click)="annulerCommande()">
+      Annuler la livraison
+    </ion-button>
 
   </div>
 </ion-content>

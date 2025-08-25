@@ -1,0 +1,33 @@
+.popup-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.popup-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ff7f00;
+  margin-bottom: 16px;
+}
+
+.popup-content p {
+  margin: 6px 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.popup-content .tarif {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #111;
+  margin-top: 12px;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}

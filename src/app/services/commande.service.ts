@@ -7,18 +7,24 @@ import { onSnapshot } from '@angular/fire/firestore';
 import { AlertController } from '@ionic/angular';
 import { inject } from '@angular/core';
 import { Commande } from '../models/commande.model';
+import { Router } from '@angular/router';
 
 
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
+  
+  errorMessage: string = '';
+
+
+  private commandes: Commande[] = [];
 
   private firestore = inject(Firestore);
   private auth = inject(Auth);
   private alertController = inject(AlertController);
  
 
-  constructor() {
+  constructor( private router : Router) {
   this.listenToTaxiCommandes();
   this.listenToLivraisonCommandes(); // 👉 ajout ici
 }
@@ -33,6 +39,23 @@ export class CommandeService {
     const q = query(commandesRef, where('uid', '==', user.uid));
     return collectionData(q, { idField: 'id' }) as Observable<Commande[]>;
   }
+
+
+// annuler une commande
+  async annulerCommande(commandeId: string, type: string) {
+  try {
+    const collectionName = type === 'livraison' ? 'livraison' : 'commandes';
+    const commandeRef = doc(this.firestore, `${collectionName}/${commandeId}`);
+
+    await updateDoc(commandeRef, { statut: 'annulée' });
+
+    console.log("Commande annulée ✅");
+    this.router.navigate(['/user/home']);
+  } catch (err) {
+    console.error("Erreur lors de l'annulation :", err);
+    this.errorMessage = "Impossible d’annuler la commande.";
+  }
+}
 
 
   // commandes de type livraison avec statut "en attente"
@@ -91,7 +114,15 @@ private async promptCommandeLivreur(commande: Commande, commandeId: string) {
             });
             await info.present();
             return;
+
           }
+
+          if (!snap.exists() || snap.data()['statut'] !== 'en attente') {
+             // commande annulée ou déjà prise
+                return;
+          }
+
+
 
           const prenom = user.displayName || 'Livreur';
           const photoURL = user.photoURL || '';

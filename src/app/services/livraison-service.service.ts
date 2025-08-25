@@ -1,103 +1,91 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc } from '@angular/fire/firestore';
-import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
+import { Firestore, query, where, doc, getDoc, updateDoc, collection, collectionData } from '@angular/fire/firestore';
+import { Auth, User } from '@angular/fire/auth';
 import { AlertController } from '@ionic/angular';
-import { QuerySnapshot, DocumentData } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
-export class LivraisonServiceService {
+export class LivraisonService {
   private currentUser: User | null = null;
 
   constructor(
     private firestore: Firestore,
     private alertController: AlertController,
     private auth: Auth
-  ) {
-    // On attend que Firebase donne l'utilisateur avant de commencer l'écoute
-    onAuthStateChanged(this.auth, (user) => {
-      this.currentUser = user;
-      if (user) {
-        this.listenToLivraisonCommandes();
-      }
-    });
+  ) {}
+
+  setUser(user: User | null) {
+    this.currentUser = user;
   }
 
+  // Vérifie si le livreur est disponible
   async isLivreurDisponible(uid: string): Promise<boolean> {
     const livreurRef = doc(this.firestore, `livreurs/${uid}`);
     const snap = await getDoc(livreurRef);
     if (!snap.exists()) return false;
-    return snap.data()?.['disponible'] === true;
+    return snap.data()?.['statut'] === 'disponible';
   }
 
-  private listenToLivraisonCommandes() {
-  if (!this.currentUser) return;
+  // Écoute les livraisons en attente pour le livreur courant
+  listenToCommandes(callback: (commande: any, id: string) => void) {
+    if (!this.currentUser) return;
 
-  const commandesRef = collection(this.firestore, 'livraison');
-  const q = query(
-    commandesRef,
-    where('statut', '==', 'en attente')
-  );
+    const commandesRef = collection(this.firestore, 'livraison');
+    const q = query(commandesRef, where('statut', '==', 'en attente'));
 
-  onSnapshot(q, async (snapshot: QuerySnapshot<DocumentData>) => {
-    for (const change of snapshot.docChanges()) {
-      if (change.type === 'added') {
-        const commande = change.doc.data();
-        const commandeId = change.doc.id;
+    collectionData(q, { idField: 'id' }).subscribe(async commandes => {
+      const isDispo = await this.isLivreurDisponible(this.currentUser!.uid);
+      if (!isDispo) return;
 
-        const isDispo = await this.isLivreurDisponible(this.currentUser!.uid);
-        if (isDispo) {
-          this.promptCommandeLivreur(commande, commandeId);
-        }
+      for (const commande of commandes) {
+        callback(commande, commande['id']);
       }
+    });
+  }
+
+  // Accepte une livraison
+  async acceptLivraison(commandeId: string): Promise<boolean> {
+    if (!this.currentUser) return false;
+
+    const commandeRef = doc(this.firestore, `livraison/${commandeId}`);
+    const snap = await getDoc(commandeRef);
+
+    if (!snap.exists() || snap.data()?.['statut'] !== 'en attente') {
+      return false;
     }
-  });
-}
 
-
-  private async promptCommandeLivreur(commande: any, commandeId: string) {
-    const alert = await this.alertController.create({
-      header: 'Nouvelle livraison',
-      message: `
-        <strong>Départ:</strong> ${commande.depart}<br>
-        <strong>Destination:</strong> ${commande.destination}<br>
-        <strong>Prix:</strong> ${commande.prix} FCFA<br><br>
-        Voulez-vous accepter cette livraison ?
-      `,
-      buttons: [
-        { text: 'Refuser', role: 'cancel' },
-        {
-          text: 'Accepter',
-          handler: async () => {
-            if (!this.currentUser) return;
-
-            const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
-            const snap = await getDoc(commandeRef);
-
-            if (!snap.exists() || snap.data()?.['statut'] !== 'en attente') {
-              const info = await this.alertController.create({
-                header: 'Commande déjà prise',
-                message: `Cette livraison a déjà été acceptée.`,
-                buttons: ['OK']
-              });
-              await info.present();
-              return;
-            }
-
-            await updateDoc(commandeRef, {
-              statut: 'prise en charge',
-              livreur: {
-                uid: this.currentUser.uid,
-                prenom: this.currentUser.displayName || 'Livreur',
-                photoURL: this.currentUser.photoURL || ''
-              }
-            });
-          }
-        }
-      ]
+    await updateDoc(commandeRef, {
+      statut: 'prise en charge',
+      livreurId: this.currentUser.uid,
+      livreur: {
+        uid: this.currentUser.uid,
+        nom: this.currentUser.displayName || '',
+        prenom: this.currentUser.displayName || '',
+        telephone: this.currentUser.phoneNumber || '',
+        photoURL: this.currentUser.photoURL || '',
+        role: 'courier',
+        statut: 'occupé'
+      }
     });
 
-    await alert.present();
+    return true;
+  }
+
+  // Annule une livraison
+  async annulerLivraison(commandeId: string): Promise<boolean> {
+    const livraisonRef = doc(this.firestore, `livraison/${commandeId}`);
+    const snap = await getDoc(livraisonRef);
+
+    if (!snap.exists()) {
+      console.error("Erreur : livraison introuvable !");
+      return false;
+    }
+
+    await updateDoc(livraisonRef, {
+      statut: 'annulée'
+    });
+
+    return true;
   }
 }

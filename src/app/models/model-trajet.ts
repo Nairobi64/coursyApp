@@ -1,9 +1,9 @@
 export interface Trajet {
   uid: string;
-  Depart: string;
-  Destination: string;
-  Distance: Number;
-  Duree: Number;
-  Prix?: Number;
+  depart: string;
+  destination: string;
+  distance: number;
+  duree: number;
+  prix?: number;
   createdAt: Date;
 }
