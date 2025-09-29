@@ -14,7 +14,7 @@ module.exports = {
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: ["./functions/tsconfig.json"],
+    project: [".functions/tsconfig.json"],
     "tsconfigRootDir": __dirname,
   "sourceType": "module"
   },
@@ -23,13 +23,10 @@ module.exports = {
   "/generated/**/*", // Ignore generated files.
   ".eslintrc.js",    // Ignore this config file.
 ],
-  plugins: [
-    "@typescript-eslint",
-    "import",
-  ],
-  rules: {
-    "quotes": ["error", "double"],
-    "import/no-unresolved": 0,
-    "indent": ["error", 2],
-  },
+  plugins: ["@typescript-eslint","import",],
+  extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+    rules: {
+  "@typescript-eslint/no-namespace": "off",
+  "@typescript-eslint/no-var-requires": "off"
+},
 };

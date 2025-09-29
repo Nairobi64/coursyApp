@@ -144,6 +144,59 @@ export const sendWelcomeEmail = functions.auth.user().onCreate(
   }
 );
 
+// ========= EMAIL SUR CREATION DE COLIS =========
+export const sendTrackingEmail = functions.firestore
+  .document("colis/{colisId}")
+  .onCreate(async (snap, context) => {
+    const data = snap.data();
+    if (!data) return null;
+
+    // 📌 Vérifier si un email est présent (il faut que tu stockes email dans users ou dans le colis)
+    let email = data.expediteurEmail;
+    let nom = data.expediteurNom || "Client";
+
+    // si pas d'email dans le colis → aller chercher dans `users/{uid}`
+    if (!email && data.client?.uid) {
+      const userSnap = await admin.firestore().doc(`users/${data.client.uid}`).get();
+      if (userSnap.exists) {
+        email = userSnap.data()?.email;
+        nom = userSnap.data()?.prenom || nom;
+      }
+    }
+
+    if (!email) {
+      console.warn("⚠️ Aucun email trouvé pour ce colis, email non envoyé");
+      return null;
+    }
+
+    const trackingNumber = data.trackingNumber;
+
+    const msg: sgMail.MailDataRequired = {
+      to: email,
+      from: SENDGRID_SENDER,
+      subject: "📦 Votre numéro de suivi",
+      text: `Bonjour ${nom}, votre colis a été enregistré. 
+Numéro de suivi : ${trackingNumber}. 
+Merci d'utiliser notre service 🚚`,
+      html: `
+        <h2>Bonjour ${nom} 👋</h2>
+        <p>Votre colis a bien été enregistré.</p>
+        <p><b>Numéro de suivi :</b> ${trackingNumber}</p>
+        <p>Merci d'utiliser notre service 🚚</p>
+      `,
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(`✅ Email de suivi envoyé à ${email}`);
+    } catch (err) {
+      console.error("❌ Erreur envoi email suivi :", err);
+    }
+
+    return null;
+  });
+
+
 // ========= SMS CLIENT SUR COMMANDE =========
 export const sendSmsOnCommandeUpdate = functions.firestore
   .document("livraison/{commandeId}")
