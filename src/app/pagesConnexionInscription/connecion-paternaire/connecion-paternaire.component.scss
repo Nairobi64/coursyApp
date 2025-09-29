@@ -1,27 +1,29 @@
 .login-container {
-  max-width: 400px;
-  margin: auto;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  max-width: 380px;
+  margin: 40px auto;
+  padding: 30px 25px;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #f1f1f1; // ✅ Remplace l'ombre par une bordure fine et douce
 }
 
 .tab-buttons {
   display: flex;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
+  gap: 10px;
 
   button {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border: none;
-    background: #eee;
+    background: #f6f6f6;
     font-weight: 600;
-    border-radius: 8px 8px 0 0;
+    border-radius: 12px;
     cursor: pointer;
+    transition: background 0.3s, color 0.3s;
 
     &.active {
-      background: #ff7f00;
+      background: linear-gradient(135deg, #ff7f00, #ff9f3f);
       color: white;
     }
   }
@@ -29,11 +31,48 @@
 
 h2 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.input-field {
+  --background: #fafafa;
+  --highlight-color-focused: #ff7f00;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.btn-primary {
+  --background: linear-gradient(135deg, #ff7f00, #ff9f3f);
+  --border-radius: 12px;
+  margin-top: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.btn-google {
+  --background: #fff;
+  --color: #444;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+.btn-google ion-icon {
+ background-color:#db4437;
 }
 
 .error-message {
   color: #ff7f00;
   text-align: center;
-  margin-top: 10px;
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+.btn-google ion-icon {
+ background-color:#db4437;
 }

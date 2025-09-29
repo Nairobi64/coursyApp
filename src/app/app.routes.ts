@@ -26,7 +26,7 @@ export const routes: Routes = [
     path: 'user',
     
     loadComponent: () => import('./layout/user-layout/user-layout.component').then(m => m.UserLayoutComponent),
-    // canActivate: [authGuard, roleGuard('users')],
+    canActivate: [authGuard, roleGuard('users')],
     children: [
       { path: '', redirectTo: 'commande', pathMatch: 'full' },
       { path: 'commande', loadComponent: () => import('./pagesUser/commande/commande.component').then(m => m.CommandeComponent) },
@@ -38,6 +38,7 @@ export const routes: Routes = [
       {path: 'paiement',loadComponent:() => import ('./pagesUser/paiement/paiement.component').then(ma => ma.PaiementComponent)},
       {path: 'noscolis',loadComponent:() => import ('./noscolis/noscolis-forms/noscolis-forms.component').then(ma => ma.NoscolisFormsComponent)},
       {path: 'suivi',loadComponent:() => import ('./noscolis/suivi-colis/suivi-colis.component').then(ma => ma.SuiviColisComponent)},
+      {path: 'commande-livraison',loadComponent:() => import ('./pagesUser/histo-user-livraison/histo-user-livraison.component').then(ma => ma.HistoUserLivraisonComponent)},
 
 
     ],
@@ -46,8 +47,8 @@ export const routes: Routes = [
 
   // Espace chauffeur
   {
-    path: 'driver',
-    // canActivate: [authGuard, roleGuard('drivers')],
+    path: 'drivers',
+    canActivate: [authGuard, roleGuard('drivers')],
     loadComponent: () => import('./layout/driver-menu/driver-menu.component').then(m => m.DriverMenuComponent),
     children: [
       { path: '', redirectTo: 'courses', pathMatch: 'full' },
@@ -62,12 +63,11 @@ export const routes: Routes = [
 
   // Espace livreur
   {
-    path: 'livreur',
-    // canActivate: [authGuard, roleGuard('livreur')],
-    // loadComponent: () => import('./layouts/courier-layout/courier-layout.component').then(m => m.CourierLayoutComponent),
+    path: 'livreurs',
+    canActivate: [authGuard, roleGuard('livreurs')],
+    loadComponent: () => import('./layout/layout-livreur/layout-livreur.component').then(m => m.LayoutLivreurComponent),
     children: [
       { path: '', redirectTo: 'livraisons', pathMatch: 'full' },
-      // { path: 'livraisons', loadComponent: () => import('./pagesLivreur/').then(m => m.LivraisonsComponent) },
       { path: 'historique', loadComponent: () => import('./pagesLivreur/historique-livreur/historique-livreur.component').then(m => m.HistoriqueLivreurComponent) },
       { path: 'profile', loadComponent: () => import('./pagesLivreur/profile-livreur/profile-livreur.component').then(m => m.ProfileLivreurComponent) },
       { path: 'modif-livreur', loadComponent: () => import('./pagesLivreur/modif-livreur/modif-livreur.component').then(m => m.ModifLivreurComponent) },
@@ -80,8 +80,8 @@ export const routes: Routes = [
 
   {
     path: 'admin',
-    // canActivate: [authGuard, roleGuard('livreur')],
-    // loadComponent: () => import('./layouts/courier-layout/courier-layout.component').then(m => m.CourierLayoutComponent),
+    canActivate: [authGuard, roleGuard('admin')],
+    loadComponent: () => import('./layout/layout-admin/layout-admin.component').then(m => m.LayoutAdminComponent),
     children: [
       { path: '', redirectTo: 'administration', pathMatch: 'full' },
       { path: 'utilisateurs', loadComponent: () => import('./pagesAdmin/utilisateurs-liste/utilisateurs-liste.component').then(m => m.UtilisateursListeComponent) },
@@ -94,6 +94,6 @@ export const routes: Routes = [
 
 
   // Page d’erreur ou indisponible
-  { path: 'indisponible', loadComponent: () => import('./pagesDriver/indisponible/indisponible.component').then(m => m.IndisponibleComponent) }
+  { path: 'indisponible', loadComponent: () => import('./indisponible/indisponible.component').then(m => m.IndisponibleComponent) }
 
 ];

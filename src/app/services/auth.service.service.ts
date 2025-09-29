@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import {Auth,createUserWithEmailAndPassword,signInWithEmailAndPassword,updateProfile,signOut,UserCredential} from '@angular/fire/auth';
+import {Auth,GoogleAuthProvider, signInWithPopup,createUserWithEmailAndPassword,signInWithEmailAndPassword,updateProfile,signOut,UserCredential} from '@angular/fire/auth';
 import {Firestore, doc, setDoc, getDoc,docData} from '@angular/fire/firestore';
 import { Observable, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 
+
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthServiceService {
   constructor(
     private auth: Auth,
     private firestore: Firestore,
@@ -78,7 +79,7 @@ export class AuthService {
       disponible: false,
       ...userData,
       createdAt: new Date()
-    });
+    }, { merge: true });
 
     localStorage.setItem('currentUser', JSON.stringify({
       uid,
@@ -116,7 +117,7 @@ export class AuthService {
       localStorage.setItem('currentUser', JSON.stringify(data));
       this.redirectAfterLogin(role);
     } else {
-      console.warn('Profil non trouvé dans Firestore');
+      console.warn('Profile non trouvé dans Firestore');
     }
 
     return credentials;
@@ -142,27 +143,31 @@ export class AuthService {
   // REDIRECTION SELON RÔLE
   // =========================
   redirectAfterLogin(role: string) {
-    role = (role || '').trim().toLowerCase();
+  role = (role || '').trim().toLowerCase();
 
-    switch (role) {
-      case 'drivers':
-        this.router.navigate(['/driver/profile']);
-        break;
-      case 'livreurs':
-        this.router.navigate(['/livreur/profile']);
-        break;
-      case 'users':
-        this.router.navigate(['/user/commande']);
-        break;
-      case 'admin':
-        this.router.navigate(['/admin/dashboard']);
-        break;
-      default:
-        this.router.navigate(['/indisponible']);
-    }
-    console.log('Redirection avec rôle :', role);
-
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
   }
+
+  switch (role) {
+    case 'drivers':
+      this.router.navigate(['/drivers/profile']);
+      break;
+    case 'livreurs':
+      this.router.navigate(['/livreurs/profile']);
+      break;
+    case 'users':
+      this.router.navigate(['/user/commande']);
+      break;
+    case 'admin':
+      this.router.navigate(['/admin/dashboard']);
+      break;
+    default:
+      this.router.navigate(['/indisponible']);
+  }
+  console.log('Redirection avec rôle :', role);
+}
+
 
   // =========================
   // DÉCONNEXION
@@ -171,5 +176,19 @@ export class AuthService {
     await signOut(this.auth);
     localStorage.removeItem('currentUser');
     this.router.navigate(['/login']);
+  }
+
+
+  async loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(this.auth, provider);
+      // L’utilisateur connecté
+      console.log(result.user);
+      return result.user;
+    } catch (error) {
+      console.error('Erreur login Google', error);
+      throw error;
+    }
   }
 }

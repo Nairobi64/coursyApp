@@ -144,3 +144,37 @@
   100% { transform: scale(1); box-shadow: 0 0 0 rgba(0, 255, 0, 0.3); }
 }
 }
+
+
+
+.annulation {
+  margin-top: 8px;
+  padding: 10px;
+  border-left: 3px solid #e74c3c;
+  background: #fff5f5;
+  border-radius: 6px;
+}
+
+.annulation p {
+  margin: 2px 0;
+  font-size: 0.9rem;
+  color: #c0392b;
+}
+
+ion-button {
+  position: relative;
+
+  .notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.7rem;
+    border-radius: 50%;
+    padding: 2px 6px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

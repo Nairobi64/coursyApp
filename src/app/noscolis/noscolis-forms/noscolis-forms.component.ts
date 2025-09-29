@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { Firestore, addDoc, collection } from '@angular/fire/firestore';
+import { Firestore, addDoc,doc, getDoc, collection } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Router, RouterModule } from '@angular/router';
+
 
 
 
@@ -40,16 +41,24 @@ export class NoscolisFormsComponent implements OnInit {
   ) {}
 
 
-  ngOnInit() {}
+  async ngOnInit() {
+  const currentUser = this.auth.currentUser;
+  if (!currentUser) return;
 
-  private generateTrackingNumber(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 12; i++) { // 12 caractères après SN
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return 'SN' + code;
+  // 🔥 On suppose que tes infos client sont stockées dans "users/{uid}"
+  const userRef = doc(this.firestore, `users/${currentUser.uid}`);
+  const snap = await getDoc(userRef);
+
+  if (snap.exists()) {
+    const data: any = snap.data();
+
+    // Pré-remplir le formulaire expéditeur
+    this.colisForm.patchValue({
+      expediteurNom: `${data.prenom || ''} ${data.nom || ''}`.trim(),
+      expediteurTel: data.telephone || ''
+    });
   }
+}
 
   async onSubmit() {
     if (!this.colisForm.valid) return;
@@ -72,6 +81,8 @@ export class NoscolisFormsComponent implements OnInit {
       statut: 'en_attente',
       dateCreation: new Date(),
       trackingNumber,
+      destinataireAdresse: this.colisForm.value.destinataireAdresse,
+      destinataireTel: this.colisForm.value.destinataireTel,
       client: { uid: currentUser.uid }
     };
 
@@ -98,4 +109,14 @@ export class NoscolisFormsComponent implements OnInit {
       await toast.present();
     }
   }
+
+  private generateTrackingNumber(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 12; i++) { // 12 caractères après SN
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return 'SN' + code;
+}
+
 }

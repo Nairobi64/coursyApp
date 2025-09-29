@@ -1,15 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, PopoverController } from '@ionic/angular';
+import { IonicModule, PopoverController, AlertController } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
-import { ref, uploadBytes, getDownloadURL, Storage} from '@angular/fire/storage';
-import { AlertController } from '@ionic/angular';
-import { CommandeService } from 'src/app/services/commande.service';
-import { UserService } from 'src/app/services/user.service';
-
-import { Auth} from '@angular/fire/auth';
-
-import {Firestore, doc, getDoc, getDocs, setDoc, collection,query, where, onSnapshot} from '@angular/fire/firestore';
+import { ref, uploadBytes, getDownloadURL, Storage } from '@angular/fire/storage';
+import { Auth } from '@angular/fire/auth';
+import {
+  Firestore,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  updateDoc
+} from '@angular/fire/firestore';
 
 import { DriverPopoverComponent } from '../driver-popover/driver-popover.component';
 
@@ -22,25 +28,27 @@ import { DriverPopoverComponent } from '../driver-popover/driver-popover.compone
 })
 export class DriverProfilComponent implements OnInit {
   drivers = {
-  nom: '',
-  prenom: '',
-  ville: '',
-  role: 'chauffeur' as 'chauffeur' | 'livreur',
-  matricule: '',
-  marque: '',
-  couleur: '',
-  uid: '',
-  photoUrl: '',
-  disponible: false // ✅ ajouté
-};
+    nom: '',
+    prenom: '',
+    ville: '',
+    role: 'chauffeur' as 'chauffeur' | 'livreur',
+    matricule: '',
+    marque: '',
+    couleur: '',
+    uid: '',
+    photoUrl: '',
+    disponible: false
+  };
 
   disponible = false;
   nouvelleCourse = false;
 
+  // Statistiques
   acceptedCount = 0;
   refusedCount = 0;
   totalCourses = 0;
 
+  // Historique
   filteredCourses: {
     depart: string;
     destination: string;
@@ -49,146 +57,213 @@ export class DriverProfilComponent implements OnInit {
   }[] = [];
 
   profileImage: string | null = null;
-  selectedFile: File | null = null;
+
+  // pour éviter les notifications doublons
+  private notifiedIds = new Set<string>();
 
   constructor(
     private auth: Auth,
     private firestore: Firestore,
     private popoverController: PopoverController,
     private storage: Storage,
-    private alertCtrl: AlertController,
-    private commandeService: CommandeService,
-    private userService: UserService
+    private alertCtrl: AlertController
   ) {}
 
   async ngOnInit() {
-  const user = this.auth.currentUser;
-
-  if (!user) return;
-
-  const driverRef = doc(this.firestore, 'drivers', user.uid);
-  const snapshot = await getDoc(driverRef);
-
-  if (snapshot.exists()) {
-    const data = snapshot.data();
-    this.drivers = {
-      nom: data['nom'] || '',
-      prenom: data['prenom'] || '',
-      ville: data['ville'] || '',
-      role: data['role'] || 'chauffeur',
-      matricule: data['matricule'] || '',
-      marque: data['marque'] || '',
-      couleur: data['couleur'] || '',
-      uid: user.uid, // 🔐 récupéré via Auth
-      photoUrl: data['photoUrl'] || '',
-      disponible: data['disponible'] ?? false
-    };
-
-    this.profileImage = this.drivers.photoUrl;
-    this.disponible = this.drivers.disponible;
-
-    if (this.drivers.role === 'chauffeur' && this.disponible) {
-      this.listenForCourses();
-    }
-
-
-    if (this.drivers.role === 'livreur' && this.disponible) {
-      this.listenForDeliveries();
-    }
-
-  }
-
-  this.loadCourses();
-  this.detectLocation();
-}
-
-
-listenForDeliveries() {
-  const q = query(
-    collection(this.firestore, 'commandes'),
-    where('statut', '==', 'en attente'),
-    where('service', '==', 'livraison'),
-    where('chauffeurId', '==', '')
-  );
-
-  let notifiedIds: string[] = [];
-
-  onSnapshot(q, snapshot => {
-    snapshot.docChanges().forEach(change => {
-      const docId = change.doc.id;
-      if (change.type === 'added' && !notifiedIds.includes(docId)) {
-        this.nouvelleCourse = true;
-        this.alertNewCommande(
-          change.doc.data()['depart'],
-          change.doc.data()['destination']
-        );
-        notifiedIds.push(docId);
-      }
-    });
-
-    if (snapshot.size === 0) {
-      this.nouvelleCourse = false;
-    }
-  });
-}
-
-
-
-  // 🔁 Active ou désactive la disponibilité
-  async toggleDisponibilite() {
-    this.disponible = !this.disponible;
-
     const user = this.auth.currentUser;
-    if (user) {
-      const driverRef = doc(this.firestore, 'drivers', user.uid);
-      await setDoc(driverRef, { disponible: this.disponible }, { merge: true });
+    if (!user) return;
+
+    // Charger les infos du driver
+    const driverRef = doc(this.firestore, 'drivers', user.uid);
+    const snapshot = await getDoc(driverRef);
+
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      this.drivers = {
+        nom: data['nom'] || '',
+        prenom: data['prenom'] || '',
+        ville: data['ville'] || '',
+        role: data['role'] || 'chauffeur',
+        matricule: data['matricule'] || '',
+        marque: data['marque'] || '',
+        couleur: data['couleur'] || '',
+        uid: user.uid,
+        photoUrl: data['photoUrl'] || '',
+        disponible: data['disponible'] ?? false
+      };
+
+      this.profileImage = this.drivers.photoUrl;
+      this.disponible = this.drivers.disponible;
 
       if (this.disponible) {
-        this.listenForCourses();
-      } else {
-        this.nouvelleCourse = false;
+        this.drivers.role === 'chauffeur' ? this.listenForCourses() : this.listenForDeliveries();
       }
+    }
+
+    // Charger l’historique
+    this.loadCourses();
+    this.detectLocation();
+  }
+
+  // 🔁 Active/désactive la disponibilité
+  async toggleDisponibilite() {
+    this.disponible = !this.disponible;
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const driverRef = doc(this.firestore, 'drivers', user.uid);
+    await setDoc(driverRef, { disponible: this.disponible }, { merge: true });
+
+    if (this.disponible) {
+      this.notifiedIds.clear(); // réinitialiser notifications
+      this.drivers.role === 'chauffeur'
+        ? this.listenForCourses()
+        : this.listenForDeliveries();
+    } else {
+      this.nouvelleCourse = false;
+      this.notifiedIds.clear();
     }
   }
 
-  // 🔁 Écoute les courses disponibles en temps réel
- listenForCourses() {
-  const q = query(
-    collection(this.firestore, 'commandes'),
-    where('statut', '==', 'en attente'),
-    where('service', '==', 'taxi'),
-    where('chauffeurId', '==', '')
-  );
-
-  let notifiedIds: string[] = [];
+  // 🚕 Écoute des courses Taxi
+  listenForCourses() {
+    const q = query(
+      collection(this.firestore, 'commandes'),
+      where('statut', '==', 'en attente'),
+      where('service', '==', 'taxi')
+    );
 
     onSnapshot(q, snapshot => {
-    snapshot.docChanges().forEach(change => {
-      const docId = change.doc.id;
-      if (change.type === 'added' && !notifiedIds.includes(docId)) {
-        this.nouvelleCourse = true;
-        this.alertNewCommande(change.doc.data()['depart'], change.doc.data()['destination']);
-        notifiedIds.push(docId);
-      }
+      snapshot.docChanges().forEach(change => {
+        const docId = change.doc.id;
+        const data = change.doc.data() as any;
+
+        if (change.type === 'added' && !this.notifiedIds.has(docId)) {
+          this.nouvelleCourse = true;
+          // stocke pour éviter ré-affichage multiple
+          this.notifiedIds.add(docId);
+          this.alertNewCommande(docId, data['depart'], data['destination'], data['prix']);
+        }
+      });
+
+      if (snapshot.size === 0) this.nouvelleCourse = false;
+    });
+  }
+
+  // 🚚 Écoute des livraisons (si tu veux la même logique côté livreur)
+  listenForDeliveries() {
+    const q = query(
+      collection(this.firestore, 'commandes'),
+      where('statut', '==', 'en attente'),
+      where('service', '==', 'livraison')
+    );
+
+    onSnapshot(q, snapshot => {
+      snapshot.docChanges().forEach(change => {
+        const docId = change.doc.id;
+        const data = change.doc.data() as any;
+
+        if (change.type === 'added' && !this.notifiedIds.has(docId)) {
+          this.nouvelleCourse = true;
+          this.notifiedIds.add(docId);
+          this.alertNewCommande(docId, data['depart'], data['destination'], data['prix']);
+        }
+      });
+
+      if (snapshot.size === 0) this.nouvelleCourse = false;
+    });
+  }
+
+  // 🔔 Alerte nouvelle commande — choix obligatoire Accepter / Refuser
+  async alertNewCommande(commandeId: string, depart: string, destination: string, prix: number) {
+    const alert = await this.alertCtrl.create({
+      header: 'Nouvelle course disponible !',
+      message: `
+        <strong>Départ :</strong> ${depart}<br>
+        <strong>Destination :</strong> ${destination}<br>
+        <strong>Prix :</strong> ${prix} FCFA
+      `,
+      backdropDismiss: false, // obligé de choisir
+      buttons: [
+        {
+          text: 'Refuser',
+          role: 'cancel',
+          handler: async () => {
+            // n'altère pas la commande globale (permet à d'autres chauffeurs de la prendre)
+            await this.recordHistorique(commandeId, depart, destination, prix, 'refusée');
+            // on garde l'id dans notifiedIds pour ne pas redemander
+          }
+        },
+        {
+          text: 'Accepter',
+          handler: async () => {
+            await this.acceptCommande(commandeId, depart, destination, prix);
+          }
+        }
+      ]
     });
 
-    if (snapshot.size === 0) {
-      this.nouvelleCourse = false;
+    await alert.present();
+  }
+
+  // Accepter : vérifie l'état, met a jour la commande et l'historique, rend le driver indisponible
+  private async acceptCommande(commandeId: string, depart: string, destination: string, prix: number) {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const commandeRef = doc(this.firestore, 'commandes', commandeId);
+    const snap = await getDoc(commandeRef);
+
+    if (!snap.exists() || snap.data()?.['statut'] !== 'en attente') {
+      const info = await this.alertCtrl.create({
+        header: 'Commande déjà prise',
+        message: `Désolé, cette commande a déjà été acceptée.`,
+        buttons: ['OK']
+      });
+      await info.present();
+      return;
     }
-  });
-}
 
-async alertNewCommande(depart: string, destination: string) {
-  const alert = await this.alertCtrl.create({
-    header: 'Nouvelle course disponible !',
-    message: `Départ : ${depart}<br>Destination : ${destination}`,
-    buttons: ['Voir plus tard']
-  });
+    const prenom = this.drivers.prenom || user.displayName || 'Chauffeur';
+    const photoURL = this.drivers.photoUrl || user.photoURL || '';
 
-  await alert.present();
-}
+    // Mise à jour de la commande
+    await updateDoc(commandeRef, {
+      statut: 'prise en charge',
+      chauffeurId: user.uid,
+      chauffeur: { uid: user.uid, prenom, photoURL }
+    });
 
-  // 📥 Téléversement de photo
+    // Historique chauffeur
+    await this.recordHistorique(commandeId, depart, destination, prix, 'acceptée');
+
+    // Marquer le chauffeur indisponible pour éviter qu'il prenne plusieurs courses
+    const driverRef = doc(this.firestore, 'drivers', user.uid);
+    await setDoc(driverRef, { disponible: false }, { merge: true });
+    this.disponible = false;
+    this.nouvelleCourse = false;
+
+    // recharge l'historique / stats
+    await this.loadCourses();
+  }
+
+  // Enregistre dans drivers/{uid}/historique
+  private async recordHistorique(commandeId: string, depart: string, destination: string, prix: number, status: 'acceptée' | 'refusée') {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const historiqueRef = doc(collection(this.firestore, `drivers/${user.uid}/historique`));
+    await setDoc(historiqueRef, {
+      commandeId,
+      depart,
+      destination,
+      prix,
+      status,
+      date: new Date().toISOString()
+    });
+  }
+
+  // 📸 Gestion photo de profil
   triggerFileInput() {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) fileInput.click();
@@ -197,7 +272,6 @@ async alertNewCommande(depart: string, destination: string) {
   async onImageSelected(event: any) {
     const file = event.target.files[0];
     if (!file) return;
-
     const user = this.auth.currentUser;
     if (!user) return;
 
@@ -218,17 +292,14 @@ async alertNewCommande(depart: string, destination: string) {
     }
   }
 
-  // ✅ Charger les commandes affectées à ce chauffeur
+  // 📜 Charger l’historique
   async loadCourses() {
     const user = this.auth.currentUser;
     if (!user) return;
 
-    const q = query(
-      collection(this.firestore, 'commandes'),
-      where('chauffeurId', '==', user.uid)
-    );
-
+    const q = collection(this.firestore, `drivers/${user.uid}/historique`);
     const snapshot = await getDocs(q);
+
     this.filteredCourses = snapshot.docs.map(doc => doc.data() as any);
 
     this.acceptedCount = this.filteredCourses.filter(c => c.status === 'acceptée').length;
@@ -236,16 +307,7 @@ async alertNewCommande(depart: string, destination: string) {
     this.totalCourses = this.filteredCourses.length;
   }
 
-  async presentPopover(ev: Event) {
-    const popover = await this.popoverController.create({
-      component: DriverPopoverComponent,
-      event: ev,
-      translucent: true,
-    });
-    await popover.present();
-  }
-
-  // 📍 Mise à jour localisation en temps réel
+  // 📍 Localisation
   async detectLocation() {
     const user = this.auth.currentUser;
     if (!user) return;
@@ -257,17 +319,20 @@ async alertNewCommande(depart: string, destination: string) {
           const lng = position.coords.longitude;
 
           const driverRef = doc(this.firestore, 'drivers', user.uid);
-          await setDoc(driverRef, {
-            location: { lat, lng }
-          }, { merge: true });
-
+          await setDoc(driverRef, { location: { lat, lng } }, { merge: true });
         },
-        (error) => {
-          console.error('Erreur de géolocalisation :', error);
-        }
+        (error) => console.error('Erreur de géolocalisation :', error)
       );
-    } else {
-      console.error("La géolocalisation n'est pas supportée");
     }
+  }
+
+  // 📌 Menu
+  async presentPopover(ev: Event) {
+    const popover = await this.popoverController.create({
+      component: DriverPopoverComponent,
+      event: ev,
+      translucent: true,
+    });
+    await popover.present();
   }
 }

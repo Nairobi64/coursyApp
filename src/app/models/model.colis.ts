@@ -4,7 +4,7 @@ export interface Colis {
   clientId: string;         // uid du client
   livreurId?: string;       // uid du livreur
   statut: 'en_attente' | 'receptionne' | 'entrepot' | 'en_livraison' | 'livre';
-  adresse: string;
+  adresseDestinataire: string;
   createdAt: any;           // Firestore Timestamp
   updatedAt: any;
 }

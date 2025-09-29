@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-toolbar style="--background: #ff7f00; color: #fff;">
+    <ion-title>Mon Profil</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="presentPopover($event)">
+        <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+        Menu
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Zone où les routes enfants s’affichent -->
+  <router-outlet></router-outlet>
+</ion-content>

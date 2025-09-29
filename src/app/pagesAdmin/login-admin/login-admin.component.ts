@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { AuthServiceService } from 'src/app/services/auth.service.service';
 
 @Component({
   selector: 'app-login-admin',
@@ -23,7 +24,8 @@ export class LoginAdminComponent  implements OnInit {
     private firestore: Firestore,
     private router: Router,
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private authService : AuthServiceService
   ) { }
 
   private async showToast(message: string, color: 'success' | 'danger' | 'medium' = 'medium') {
@@ -84,5 +86,10 @@ export class LoginAdminComponent  implements OnInit {
       await this.showToast(msg, 'danger');
     }
   }
+loginWithGoogle() {
+  this.authService.loginWithGoogle()
+    .then(user => console.log('Utilisateur connecté:', user))
+    .catch(err => console.error(err));
+}
 
 }

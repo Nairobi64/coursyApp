@@ -6,4 +6,6 @@ export interface Trajet {
   duree: number;
   prix?: number;
   createdAt: Date;
-}
+  statut?: 'en attente' | 'acceptée' | 'en cours' | 'livrée' | 'annulée';
+  motifAnnulation?: string;
+  annulePar?: 'client' | 'livreur' }

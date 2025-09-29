@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
-import { AuthService } from 'src/app/services/auth.service.service';
+import { AuthServiceService } from 'src/app/services/auth.service.service';
 
 @Component({
   selector: 'app-login-user',
@@ -19,7 +19,7 @@ export class LoginUserComponent implements OnInit {
   errorMessage = '';
 
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private authService = inject(AuthServiceService);
 
   ngOnInit() {
     this.loginForm = this.fb.group({
@@ -44,4 +44,11 @@ export class LoginUserComponent implements OnInit {
       this.loading = false;
     }
   }
+
+  loginWithGoogle() {
+  this.authService.loginWithGoogle()
+    .then(user => console.log('Utilisateur connecté:', user))
+    .catch(err => console.error(err));
+}
+
 }

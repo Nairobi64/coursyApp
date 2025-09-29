@@ -1,16 +1,19 @@
-.commande-modern {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 20px;
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
-.text-center {
-  text-align: center;
+/* Formulaire overlay en bas */
+.form-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 10px;
+  border-radius: 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  z-index: 10;
 }
-
-.form-card {
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-

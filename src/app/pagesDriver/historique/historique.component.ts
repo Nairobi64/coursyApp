@@ -35,23 +35,16 @@ export class HistoriqueComponent implements OnInit {
     const user = this.auth.currentUser;
     if (!user) return;
 
-    let q;
+    const q = collection(this.firestore, `drivers/${user.uid}/historique`);
+const snapshot = await getDocs(q);
 
-    if (this.userRole === 'chauffeur') {
-      q = query(collection(this.firestore, 'commandes'), where('chauffeur.uid', '==', user.uid));
-    } else {
-      q = query(collection(this.firestore, 'courses'), where('livreur.uid', '==', user.uid));
-    }
-
-    const snapshot = await getDocs(q);
-    this.historique = snapshot.docs.map(doc => {
-  const data = doc.data() as any; // ou as Commande ou Course selon le cas
-
+this.historique = snapshot.docs.map(doc => {
+  const data = doc.data() as any;
   return {
     depart: data.depart,
     destination: data.destination,
-    statut: data.statut || data.status,
-    date: data.date || data.createdAt?.toDate()?.toISOString() || '',
+    statut: data.statut,
+    date: data.date,
     prix: data.prix,
   };
 });

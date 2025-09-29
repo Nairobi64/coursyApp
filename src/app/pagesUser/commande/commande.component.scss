@@ -1,159 +1,103 @@
 .commande-modern {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+ion-content {
+  --min-height: 100%;
 }
 
-.text-center {
+/* Titres */
+.title-center {
   text-align: center;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #ff7f00;
 }
 
-
+/* Carte du formulaire */
 .form-card {
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  background: #fff8f0;
+  padding: 1.5rem;
 }
 
+/* Inputs */
+.input-card {
+  border-radius: 12px;
+  background: #fff4e6;
+}
+
+.icon-field {
+  color: #ff7f00;
+  font-size: 1.3rem;
+}
+
+/* Section services */
 .services-section {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .services-title {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   margin-bottom: 1rem;
+  color: #333;
 }
 
 .services-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
 
-  @media (min-width: 768px) {
+@media (min-width: 768px) {
+  .services-list {
     flex-direction: row;
   }
 }
 
 .service-card {
-  display: flex;
-  align-items: center;
+  flex: 1;
+  text-align: center;
   padding: 1rem;
   border-radius: 16px;
-  gap: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #fff5e6;
 }
 
 .service-card:hover {
-  transform: scale(1.03);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
 
 .service-icon {
   font-size: 2rem;
-  color: #ff9800;
+  color: #ff7f00;
 }
 
 .service-name {
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  display: block;
 }
-img{
-  border-radius: 15px;
+
+.service-img {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 0.5rem 0;
 }
 
 .service-desc {
   font-size: 0.9rem;
-  color: #666;
-}
-
-
-
-// popup
-
-
-/* Fond semi-transparent */
-.popup-backdrop {
-  position: fixed;
-  inset: 0;
-  color: #000;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
-
-/* Carte principale */
-.popup-card {
-  background: #fff;
-  padding: 1.5rem;
-  width: 90%;
-  max-width: 350px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  animation: popupFadeIn 0.3s ease;
-}
-
-/* Animation */
-@keyframes popupFadeIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-/* Titre */
-.popup-title {
-  font-size: 1.4rem;
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-/* Texte */
-.popup-message {
-  font-size: 1rem;
-  margin-bottom: 1.2rem;
   color: #555;
-}
-
-/* Boutons */
-.popup-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.btn {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-cancel {
-  background: #eee;
-  color: #333;
-}
-
-.btn-cancel:hover {
-  background: #ddd;
-}
-
-.btn-confirm {
-  background: #ff7f00;
-  color: white;
-}
-
-.btn-confirm:hover {
-  background: #ff7f00;
-}
-
-.btn-confirm.active {
-  background: #4caf50;
-}
-
-.btn-confirm.active:hover {
-  background: #449d48;
+  text-align: center;
 }

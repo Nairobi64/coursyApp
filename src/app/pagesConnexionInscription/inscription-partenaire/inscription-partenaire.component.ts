@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormBuilder, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from 'src/app/services/auth.service.service';
+import { AuthServiceService } from 'src/app/services/auth.service.service';
+
+
 @Component({
   selector: 'app-inscription-partenaire',
   templateUrl: './inscription-partenaire.component.html',
@@ -19,7 +21,7 @@ export class InscriptionPartenaireComponent  implements OnInit {
 
   private fb = inject(FormBuilder);
   private router = inject(Router);
-  private authService = inject(AuthService);
+  private authService = inject(AuthServiceService);
 
 
   ngOnInit(): void {
@@ -44,30 +46,32 @@ export class InscriptionPartenaireComponent  implements OnInit {
     ville: ['', Validators.required],
     telephone: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{8,15}$')]],
     email: ['', [Validators.required, Validators.email]],
-    Matricule: ['', Validators.required],
-    Couleur: ['', Validators.required],
+    matricule: ['', Validators.required],
+    marque: ['', Validators.required],
+    couleur: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  async register(role: 'drivers' | 'livreurs') {
-    this.errorMessage = 'Vous n avez pas pu vous enregistrer.';
-    this.loading = true;
+ async register(role: 'drivers' | 'livreurs') {
+  this.errorMessage = 'Vous n avez pas pu vous enregistrer.';
+  this.loading = true;
 
-    const form = role === 'drivers' ? this.chauffeurForm : this.livreurForm;
-    if (form.invalid) { this.loading = false; return; }
+  const form = role === 'livreurs' ? this.chauffeurForm : this.livreurForm;
+  if (form.invalid) { this.loading = false; return; }
 
-    try {
-      await this.authService.register(
-        form.value.email!,
-        form.value.password!,
-        { ...form.value, role, disponible: false }
-      );
-      this.router.navigate([role === 'drivers' ? '/driver/profile' : '/livreur/profile']);
-    } catch (error: any) {
-      this.errorMessage = error.message;
-    } finally {
-      this.loading = false;
-    }
+  try {
+    await this.authService.register(
+      form.value.email!,
+      form.value.password!,
+      { ...form.value, role, disponible: false }
+    );
+    // ✅ Pas de redirection ici, c'est le service qui gère
+  } catch (error: any) {
+    this.errorMessage = error.message;
+  } finally {
+    this.loading = false;
   }
+}
+
 
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from 'src/app/services/auth.service.service';
+import { AuthServiceService } from 'src/app/services/auth.service.service';
 
 import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
 import { Firestore, doc, setDoc } from '@angular/fire/firestore';
@@ -23,7 +23,7 @@ export class RegisterUserComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(Auth);
   private db = inject(Firestore);
-  private authService = inject(AuthService);
+  private authService = inject(AuthServiceService);
 
 
   loading = false;

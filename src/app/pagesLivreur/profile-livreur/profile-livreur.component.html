@@ -1,17 +1,9 @@
-<ion-header>
-  <ion-toolbar color="light">
-    <ion-title>Mon Profil Livreur</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="presentPopover($event)">
-        <ion-icon name="ellipsis-vertical-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+
+
 
 <ion-content class="ion-padding driver-profile-container">
 
-  <!-- 🔔 Alerte nouvelle livraison -->
+  <!-- 🔔 Alerte nouvelle livraison
   <ion-card *ngIf="nouvelleCourse && disponible" color="light" class="pulse-badge">
     <ion-card-header>
       <ion-card-title>🚨 Nouvelle livraison disponible</ion-card-title>
@@ -22,7 +14,7 @@
         Voir la livraison
       </ion-button>
     </ion-card-content>
-  </ion-card>
+  </ion-card> -->
 
   <!-- 👤 Profil livreur -->
   <div class="profile-image-section">
@@ -32,7 +24,7 @@
       <ion-icon name="camera-outline"></ion-icon> Modifier
     </ion-button>
 
-    <h2 class="driver-name">{{ livreurs.prenom }} {{ livreurs.nom }}</h2>
+    <h2 class="driver-name">Bonjour {{ livreurs.prenom }}</h2>
     <p class="driver-city">{{ livreurs.ville }}</p>
   </div>
 
@@ -43,13 +35,27 @@
       (click)="toggleDisponibilite()" 
       expand="block" 
       class="availability-button">
-      {{ disponible ? 'Disponible pour livrer' : 'Indisponible' }}
+      {{ disponible ? 'Disponible' : 'Indisponible' }}
     </ion-button>
   </div>
 
+  <div class="position-container">
+  <h3>📍 Position actuelle</h3>
+  <p *ngIf="latitude && longitude">
+    Latitude: {{ latitude }} <br>
+    Longitude: {{ longitude }}
+  </p>
+  <p *ngIf="!latitude || !longitude">Position non disponible</p>
+
+  <ion-button (click)="getCurrentPosition()">Obtenir position</ion-button>
+  <ion-button color="success" (click)="startTracking()">Démarrer suivi</ion-button>
+  <ion-button color="danger" (click)="stopTracking()">Arrêter suivi</ion-button>
+</div>
+
+
   <!-- 📦 Bouton pour voir les livraisons -->
-  <ion-button expand="block" color="primary" [routerLink]="['/livreur/historique']">
-    📋 Voir l’historique des livraisons
+  <ion-button expand="block" color="primary">
+    📋 Historique des livraisons
   </ion-button>
 
   <!-- 📊 Résumé des courses -->
@@ -72,24 +78,51 @@
     </ion-grid>
   </div>
 
+  <!-- commande terminee -->
+
+
+
+
   <!-- 🕓 Historique -->
   <div class="history-section">
     <h4>Historique des livraisons</h4>
-    <ion-list>
-      <ion-item *ngFor="let course of filteredCourses">
-        <ion-label>
-          <h5>{{ course.depart }} → {{ course.destination }}</h5>
-          <p>
-            <strong [style.color]="course.statut === 'acceptée' ? 'green' : 'red'">
-              {{ course.statut }}
-            </strong>
-            • 
-            <!-- Affiche date et heure formatées -->
-            {{ course.date?.toDate ? (course.date.toDate() | date:'dd/MM/yyyy HH:mm') : (course.date | date:'dd/MM/yyyy HH:mm') }}
-          </p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </div>
+  <ion-list>
+  <ion-item *ngFor="let course of filteredCourses">
+    <ion-label>
+      <h5>{{ course.depart }} → {{ course.destination }}</h5>
+      <p>
+        <strong 
+          [style.color]="course.statut === 'acceptée' ? 'green' : 
+                         (course.statut === 'terminée' ? 'blue' : 
+                         (course.statut === 'refusée' ? 'orange' : 'red'))">
+          {{ course.statut }}
+        </strong>
+        •
+        {{ course.date?.toDate ? (course.date.toDate() | date:'dd/MM/yyyy HH:mm') : (course.date | date:'dd/MM/yyyy HH:mm') }}
+      </p>
 
-</ion-content>
+      <!-- ✅ Boutons visibles UNIQUEMENT si statut == acceptée -->
+      <div *ngIf="course.statut === 'acceptée'">
+        <ion-button size="small" color="success" (click)="terminerCourse(course.id)">
+          Terminer
+        </ion-button>
+        <ion-button size="small" color="danger" (click)="annulerCourse(course.id)">
+          Annuler
+        </ion-button>
+      </div>
+
+      <!-- ✅ Si annulée : afficher motif -->
+      <div *ngIf="course.statut === 'annulée'" class="annulation">
+        <p><strong>Motif :</strong> {{ course.motifAnnulation }}</p>
+        <p><strong>Annulé par :</strong> 
+          <span *ngIf="course.annulePar === 'user'">Client</span>
+          <span *ngIf="course.annulePar === 'livreur'">Livreur</span>
+        </p>
+      </div>
+    </ion-label>
+  </ion-item>
+</ion-list>
+
+
+
+

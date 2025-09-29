@@ -31,7 +31,7 @@ export class SuiviColisComponent  implements OnInit {
 
     try {
       const colisRef = collection(this.firestore, 'colis');
-      const q = query(colisRef, where('suivi', '==', this.trackingNumber));
+      const q = query(colisRef, where('trackingNumber', '==', this.trackingNumber));
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {

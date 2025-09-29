@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from 'src/app/services/auth.service.service';
+import { AuthServiceService } from 'src/app/services/auth.service.service';
 
 @Component({
   selector: 'app-user-layout',
@@ -12,7 +12,7 @@ import { AuthService } from 'src/app/services/auth.service.service';
   imports: [IonicModule, CommonModule, RouterModule]
 })
 export class UserLayoutComponent implements OnInit {
-  private authService = inject(AuthService);
+  private authService = inject(AuthServiceService);
   private router = inject(Router);
 
   prenom = '';

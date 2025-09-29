@@ -9,6 +9,7 @@ import { Firestore, collection, addDoc, serverTimestamp } from '@angular/fire/fi
 import { AlertController } from '@ionic/angular';
 import { ModalController } from '@ionic/angular';
 import { PopupCommandeComponent } from '../popup-commande/popup-commande.component';
+import { NotificationsService } from 'src/app/services/notifications.service';
 
 declare var google: any;
 
@@ -36,7 +37,8 @@ export class CommandeComponent implements OnInit {
     private router: Router,
     private auth: Auth,
     private firestore: Firestore,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController, 
+    private notifService: NotificationsService
   ) {}
 
   ngOnInit() {
@@ -52,6 +54,9 @@ export class CommandeComponent implements OnInit {
     }
 
     this.getCurrentPosition();
+
+    this.notifService.initPush();
+
   }
 
   searchPlace(event: any, field: 'depart' | 'destination') {
@@ -65,7 +70,7 @@ export class CommandeComponent implements OnInit {
 
     const request = {
       input,
-      types: ['address'],
+      types: ['geocode'],
       componentRestrictions: { country: 'SN' }
     } as any;
 

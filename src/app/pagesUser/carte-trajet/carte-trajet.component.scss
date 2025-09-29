@@ -1,121 +1,136 @@
-.trajet-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.trajet-content {
+  --background: transparent;
+  padding: 0;
 }
 
-.map-section {
+/* Carte plein écran */
+.map-fullscreen {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 60vh;
-  border-radius: 18px;
-  overflow: hidden;
-  position: relative;
+  height: 100vh;
+  z-index: 0;
 }
-
 #map {
   width: 100%;
   height: 100%;
 }
 
-/* Loader fondu */
-.loader-overlay {
+/* Superposition au-dessus de la carte */
+.overlay-info {
   position: absolute;
-  top: 0; left: 0;
+  bottom: 0;
   width: 100%;
-  height: 100%;
-  background: rgba(255,255,255,0.8);
+  padding: 16px;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   gap: 12px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255,255,255,0.3) 50%, transparent 90%);
 }
 
-.loader-visible {
-  opacity: 1;
-  pointer-events: all;
+/* Bloc léger transparent */
+.overlay-block {
+  background: #ffffffee;
+  padding: 12px 16px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
-
-/* Cards aéré */
-.recap-card,
-.driver-card {
-  border-radius: 16px;
-  box-shadow: none;
-  border: 1px solid #eee;
-  padding: 16px;
-  background: #fff;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: slideFadeIn 0.5s forwards;
-}
-
-.card-anim {
-  animation-delay: 0.2s; /* petit délai pour effet cascade */
+.overlay-block.driver {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* Infos trajet */
-.trajet-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .trajet-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
 }
 
-/* Profil livreur */
+/* Livreurs */
 .driver-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .driver-photo {
-  width: 70px;
-  height: 70px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #ff7f00;
 }
-
-.driver-name-role {
-  display: flex;
-  flex-direction: column;
-}
-
 .driver-name {
-  font-weight: bold;
-  font-size: 18px;
-  color: #222;
+  font-weight: 600;
+  font-size: 16px;
 }
-
 .driver-role {
-  font-size: 14px;
+  font-size: 13px;
   color: #777;
 }
-
 .driver-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px;
+}
+.btn-call {
+  --background: #ff7f00;
+  --color: #fff;
+  border-radius: 10px;
+  flex: 1;
+}
+.btn-msg {
+  --background: #ffd699;
+  --color: #222;
+  border-radius: 10px;
+  flex: 1;
 }
 
-/* Animation cartes */
-@keyframes slideFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ❌ Annuler (style texte seulement) */
+.cancel-text {
+  text-align: center;
+  color: #ff7f00;
+  font-weight: 500;
+  font-size: 16px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+/* Loader */
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border-radius: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.loader-visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Annulation */
+.annulation {
+  background: #fff0f0;
+  padding: 12px;
+  border-left: 4px solid #e74c3c;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.annulation .motif {
+  color: #c0392b;
+  font-style: italic;
+}
+.annulation .auteur {
+  color: #555;
 }

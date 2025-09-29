@@ -30,6 +30,8 @@ export class ColisServiceService {
       client: { uid: this.auth.currentUser?.uid },
       statut: 'en_attente',
       createdAt: new Date(),
+      destinataireAdresse: data.destinataireAdresse,
+      destinataireTel: data.destinataireTel,
       historique: [
         {
           statut: 'en_attente',

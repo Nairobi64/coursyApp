@@ -1,16 +1,30 @@
 <div class="popup-card">
+
+  <!-- Titre -->
   <h2 class="popup-title">Résumé de votre course</h2>
 
+  <!-- Contenu -->
   <div class="popup-content">
-    <p><strong>Départ :</strong> {{ depart }}</p>
-    <p><strong>Destination :</strong> {{ destination }}</p>
-    <p><strong>Distance :</strong> {{ distance }} km</p>
-    <p><strong>Durée estimée :</strong> {{ duree }} min</p>
-    <p class="tarif"><strong>Tarif :</strong> {{ prix }} FCFA</p>
+    <p><ion-icon name="locate-outline" class="popup-icon"></ion-icon> <strong>Départ :</strong> {{ depart }}</p>
+    <p><ion-icon name="flag-outline" class="popup-icon"></ion-icon> <strong>Destination :</strong> {{ destination }}</p>
+    <p><ion-icon name="walk-outline" class="popup-icon"></ion-icon> <strong>Distance :</strong> {{ distance }} km</p>
+    <p><ion-icon name="time-outline" class="popup-icon"></ion-icon> <strong>Durée :</strong> {{ duree }} min</p>
+    <p class="tarif">
+      <ion-icon name="cash-outline" class="popup-icon"></ion-icon>
+      <strong>Tarif :</strong> {{ prix }} FCFA
+    </p>
   </div>
 
+  <!-- Boutons -->
   <div class="popup-actions">
-    <ion-button fill="outline" color="medium" (click)="close()">Annuler</ion-button>
-    <ion-button color="warning" (click)="confirm()">Confirmer</ion-button>
+    <ion-button fill="outline" color="medium" class="btn-cancel" (click)="close()">
+      <ion-icon name="close-outline" slot="start"></ion-icon>
+      Annuler
+    </ion-button>
+    <ion-button color="warning" class="btn-confirm" (click)="confirm()">
+      <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+      Confirmer
+    </ion-button>
   </div>
+
 </div>

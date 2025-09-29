@@ -1,24 +1,29 @@
 <div class="login-container">
   <div class="tab-buttons">
     <button [class.active]="activeTab === 'drivers'" (click)="activeTab = 'drivers'">Chauffeur</button>
-    <button [class.active]="activeTab === 'livreur'" (click)="activeTab = 'livreur'">Livreur</button>
+    <button [class.active]="activeTab === 'livreurs'" (click)="activeTab = 'livreurs'">Livreur</button>
   </div>
 
   <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
-    <h2>Connexion {{ activeTab | titlecase }}</h2>
+    <h2>Connexion partenaires</h2>
 
-    <ion-item>
+    <ion-item class="input-field">
       <ion-label position="floating">Email</ion-label>
       <ion-input type="email" formControlName="email"></ion-input>
     </ion-item>
 
-    <ion-item>
+    <ion-item class="input-field">
       <ion-label position="floating">Mot de passe</ion-label>
       <ion-input type="password" formControlName="password"></ion-input>
     </ion-item>
 
-    <ion-button expand="block" style="background-color: #ff7f00;" type="submit" [disabled]="loginForm.invalid || loading">
+    <ion-button expand="block" class="btn-primary" type="submit" [disabled]="loginForm.invalid || loading">
       Se connecter
+    </ion-button>
+
+    <ion-button class="btn-google" (click)="loginWithGoogle()">
+      <ion-icon name="logo-google" slot="start"></ion-icon>
+      Se connecter avec Google
     </ion-button>
   </form>
 

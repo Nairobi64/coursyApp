@@ -17,3 +17,10 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular() 
   ]
 }).catch(err => console.error(err));
+
+// ✅ Enregistrement du Service Worker pour FCM
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('firebase-messaging-sw.js')
+    .then(reg => console.log("✅ Service Worker enregistré :", reg))
+    .catch(err => console.error("❌ Erreur SW :", err));
+}

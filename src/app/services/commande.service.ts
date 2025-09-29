@@ -1,231 +1,173 @@
-import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, query, where, doc, getDoc,updateDoc, QuerySnapshot, DocumentData, DocumentChange} from '@angular/fire/firestore';
-
-import { Auth } from '@angular/fire/auth';
-import { Observable,  } from 'rxjs';
-import { onSnapshot } from '@angular/fire/firestore';
+import { Injectable, inject } from '@angular/core';
+import {
+  Firestore,
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  QuerySnapshot,
+  DocumentData,
+  DocumentChange,
+  onSnapshot,
+  query,
+  where
+} from '@angular/fire/firestore';
+import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
+import { BehaviorSubject } from 'rxjs';
 import { AlertController } from '@ionic/angular';
-import { inject } from '@angular/core';
-import { Commande } from '../models/commande.model';
 import { Router } from '@angular/router';
-
-
+import { Commande } from '../models/commande.model';
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
-  
-  errorMessage: string = '';
-
-
-  private commandes: Commande[] = [];
-
   private firestore = inject(Firestore);
   private auth = inject(Auth);
   private alertController = inject(AlertController);
- 
 
-  constructor( private router : Router) {
-  this.listenToTaxiCommandes();
-  this.listenToLivraisonCommandes(); // 👉 ajout ici
-}
+  private currentUser: User | null = null;
+  private activeCommandeId$ = new BehaviorSubject<string | null>(null);
 
+  constructor(private router: Router) {
+    // 🔄 Écoute le rôle du chauffeur connecté
+    onAuthStateChanged(this.auth, async (user) => {
+      this.currentUser = user;
+      if (!user) return;
 
-  // 🔁 Récupérer les commandes créées par l'utilisateur connecté
-  getCommandesByUser(): Observable<Commande[]> {
-    const user = this.auth.currentUser;
-    if (!user) throw new Error('Utilisateur non connecté');
+      const driverRef = doc(this.firestore, 'drivers', user.uid);
+      const snapshot = await getDoc(driverRef);
+      if (!snapshot.exists()) return;
 
-    const commandesRef = collection(this.firestore, 'commandes');
-    const q = query(commandesRef, where('uid', '==', user.uid));
-    return collectionData(q, { idField: 'id' }) as Observable<Commande[]>;
-  }
-
-
-// annuler une commande
-  async annulerCommande(commandeId: string, type: string) {
-  try {
-    const collectionName = type === 'livraison' ? 'livraison' : 'commandes';
-    const commandeRef = doc(this.firestore, `${collectionName}/${commandeId}`);
-
-    await updateDoc(commandeRef, { statut: 'annulée' });
-
-    console.log("Commande annulée ✅");
-    this.router.navigate(['/user/home']);
-  } catch (err) {
-    console.error("Erreur lors de l'annulation :", err);
-    this.errorMessage = "Impossible d’annuler la commande.";
-  }
-}
-
-
-  // commandes de type livraison avec statut "en attente"
-
-  listenToLivraisonCommandes() {
-  const user = this.auth.currentUser;
-  if (!user) return;
-
-  const commandesRef = collection(this.firestore, 'commandes');
-  const q = query(
-    commandesRef,
-    where('statut', '==', 'en attente'),
-    where('service', '==', 'livraison')
-  );
-
-  onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
-    snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
-      if (change.type === 'added') {
-        const commande = change.doc.data() as Commande;
-        const commandeId = change.doc.id;
-        await this.promptCommandeLivreur(commande, commandeId);
+      const role = snapshot.data()['role'];
+      if (role === 'chauffeur') {
+        this.listenToTaxiCommandes(); // seul le chauffeur reçoit les popups
       }
     });
-  });
-}
 
-private async promptCommandeLivreur(commande: Commande, commandeId: string) {
-  const alert = await this.alertController.create({
-    header: 'Nouvelle livraison',
-    message: `
-      <strong>Départ:</strong> ${commande.depart}<br>
-      <strong>Destination:</strong> ${commande.destination}<br>
-      <strong>Prix:</strong> ${commande.prix} FCFA<br><br>
-      Voulez-vous accepter cette livraison ?
-    `,
-    buttons: [
-      {
-        text: 'Refuser',
-        role: 'cancel'
-      },
-      {
-        text: 'Accepter',
-        handler: async () => {
-          const user = this.auth.currentUser;
-          if (!user) return;
-
-          const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
-          const snap = await getDoc(commandeRef);
-
-          if (!snap.exists() || snap.data()['statut'] !== 'en attente') {
-
-            const info = await this.alertController.create({
-              header: 'Commande déjà prise',
-              message: `Cette livraison a déjà été acceptée.`,
-              buttons: ['OK']
-            });
-            await info.present();
-            return;
-
-          }
-
-          if (!snap.exists() || snap.data()['statut'] !== 'en attente') {
-             // commande annulée ou déjà prise
-                return;
-          }
-
-
-
-          const prenom = user.displayName || 'Livreur';
-          const photoURL = user.photoURL || '';
-
-          await updateDoc(commandeRef, {
-            statut: 'prise en charge',
-            livreur: {
-              uid: user.uid,
-              prenom: prenom,
-              photoURL: photoURL
-            }
-          });
-        }
-      }
-    ]
-  });
-
-  await alert.present();
-}
-
-
-
-
-  // 👂 Écouter les commandes de type taxi avec statut "en attente"
-  listenToTaxiCommandes() {
-    const user = this.auth.currentUser;
-    if (!user) return;
-
-    const commandesRef = collection(this.firestore, 'commandes');
-    const q = query(
-        collection(this.firestore, 'commandes'),
-        where('chauffeur.uid', '==', user.uid)
-      );
-
-      const c = query(
-      collection(this.firestore, 'courses'),
-      where('livreur.uid', '==', user.uid)
-    );
-
-
-    onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
-  snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
-    if (change.type === 'added') {
-      const commande = change.doc.data() as Commande;
-      const commandeId = change.doc.id;
-      await this.promptCommande(commande, commandeId);
-    }
-  });
-});
+    const savedId = localStorage.getItem('activeCommandeId');
+    if (savedId) this.setActiveCommande(savedId);
   }
 
-  // ✅ Afficher un IonAlert pour accepter la commande
-  private async promptCommande(commande: Commande, commandeId: string) {
-  const alert = await this.alertController.create({
-    header: 'Nouvelle commande',
-    message: `
-      <strong>Départ:</strong> ${commande.depart}<br>
-      <strong>Destination:</strong> ${commande.destination}<br>
-      <strong>Prix:</strong> ${commande.prix} FCFA<br><br>
-      Voulez-vous accepter cette commande ?
-    `,
-    buttons: [
-      {
-        text: 'Refuser',
-        role: 'cancel'
-      },
-      {
-        text: 'Accepter',
-        handler: async () => {
-          const user = this.auth.currentUser;
-          if (!user) return;
+  // 🔑 Commande active
+  getActiveCommandeId() {
+    return this.activeCommandeId$.asObservable();
+  }
 
-          const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
-          const snap = await getDoc(commandeRef);
+  async setActiveCommande(commandeId: string) {
+    this.activeCommandeId$.next(commandeId);
+    localStorage.setItem('activeCommandeId', commandeId);
+  }
 
-          if (!snap.exists() || snap.data()['statut'] !== 'en attente') {
+  clearCommande() {
+    this.activeCommandeId$.next(null);
+    localStorage.removeItem('activeCommandeId');
+  }
 
-            const info = await this.alertController.create({
-              header: 'Commande déjà prise',
-              message: `Désolé, cette commande a déjà été acceptée par un autre chauffeur.`,
-              buttons: ['OK']
-            });
-            await info.present();
-            return;
-          }
+  async isCommandeActive(commandeId: string): Promise<boolean> {
+    const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
+    const snap = await getDoc(commandeRef);
+    if (!snap.exists()) return false;
+    const data = snap.data() as any;
+    return ['en attente', 'prise en charge'].includes(data.statut);
+  }
 
-          const prenom = user.displayName || 'Chauffeur';
-          const photoURL = user.photoURL || '';
+  getCommandesByUser() {
+    if (!this.currentUser) throw new Error('Utilisateur non connecté');
+    const commandesRef = collection(this.firestore, 'commandes');
+    const q = query(commandesRef, where('chauffeurId', '==', this.currentUser.uid));
+    return q;
+  }
 
-          await updateDoc(commandeRef, {
-            statut: 'prise en charge',
-            chauffeur: {
-              uid: user.uid,
-              prenom: prenom,
-              photoURL: photoURL
-            }
-          });
+  // ❌ Annuler une commande
+  async annulerCommande(commandeId: string) {
+    if (!this.currentUser) return;
+
+    const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
+    const prenom = this.currentUser.displayName || 'Chauffeur';
+    const photoURL = this.currentUser.photoURL || '';
+
+    await updateDoc(commandeRef, {
+      statut: 'annulée',
+      annuléePar: { uid: this.currentUser.uid, prenom, photoURL }
+    });
+
+    this.clearCommande();
+    this.router.navigate(['/driver/home']);
+  }
+
+  // 👂 Écoute des commandes Taxi
+  private listenToTaxiCommandes() {
+    const commandesRef = collection(this.firestore, 'commandes');
+    const q = query(commandesRef, where('statut', '==', 'en attente'), where('service', '==', 'taxi'));
+
+    let notifiedIds: string[] = [];
+
+    onSnapshot(q, snapshot => {
+      snapshot.docChanges().forEach(async change => {
+        const docId = change.doc.id;
+        if (change.type === 'added' && !notifiedIds.includes(docId)) {
+          const commande = change.doc.data() as Commande;
+          await this.promptCommande(commande, docId);
+          notifiedIds.push(docId);
         }
-      } 
-    ]
-  });
+      });
+    });
+  }
 
-  await alert.present();
-}
+  private async promptCommande(commande: Commande, commandeId: string) {
+    const alert = await this.alertController.create({
+      header: 'Nouvelle commande Taxi',
+      message: `
+        <strong>Départ:</strong> ${commande.depart}<br>
+        <strong>Destination:</strong> ${commande.destination}<br>
+        <strong>Prix:</strong> ${commande.prix} FCFA<br><br>
+        Voulez-vous accepter cette commande ?
+      `,
+      buttons: [
+        { text: 'Refuser', role: 'cancel' },
+        {
+          text: 'Accepter',
+          handler: async () => {
+            if (!this.currentUser) return;
+            const commandeRef = doc(this.firestore, `commandes/${commandeId}`);
+            const snap = await getDoc(commandeRef);
 
+            if (!snap.exists() || snap.data()['statut'] !== 'en attente') {
+              const info = await this.alertController.create({
+                header: 'Commande déjà prise',
+                message: `Désolé, cette commande a déjà été acceptée.`,
+                buttons: ['OK']
+              });
+              await info.present();
+              return;
+            }
+
+            const prenom = this.currentUser.displayName || 'Chauffeur';
+            const photoURL = this.currentUser.photoURL || '';
+
+            await updateDoc(commandeRef, {
+              statut: 'prise en charge',
+              chauffeurId: this.currentUser.uid,
+              chauffeur: { uid: this.currentUser.uid, prenom, photoURL }
+            });
+
+            // ✅ Historique chauffeur
+            const historiqueRef = doc(collection(this.firestore, `drivers/${this.currentUser.uid}/historique`));
+            await setDoc(historiqueRef, {
+              commandeId,
+              depart: commande.depart,
+              destination: commande.destination,
+              prix: commande.prix,
+              status: 'acceptée',
+              date: new Date().toISOString()
+            });
+
+            this.setActiveCommande(commandeId);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
 }

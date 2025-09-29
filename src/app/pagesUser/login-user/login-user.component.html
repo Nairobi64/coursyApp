@@ -1,42 +1,43 @@
 <div class="login-page">
- 
+  <div class="overlay"></div>
   <div class="login-card">
-    <h2 class="title">Connectez-vous</h2>
+    <h2 class="title">👤 Connectez-vous</h2>
 
     <form [formGroup]="loginForm" (ngSubmit)="login()">
       <!-- Email -->
       <div class="form-group">
         <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          formControlName="email"
-          placeholder="Entrez votre email"
-        />
+        <div class="input-icon">
+          <ion-icon name="mail-outline"></ion-icon>
+          <input type="email" id="email" formControlName="email" placeholder="Entrez votre email" required />
+        </div>
       </div>
 
-      <!-- Password -->
+      <!-- Mot de passe -->
       <div class="form-group">
         <label for="password">Mot de passe</label>
-        <input
-          type="password"
-          id="password"
-          formControlName="password"
-          placeholder="••••••••"
-        />
+        <div class="input-icon">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <input type="password" id="password" formControlName="password" placeholder="••••••••" required />
+        </div>
       </div>
 
-      <div>
-         <a [routerLink]="['/register-user']"> Creez un compte </a>
+      <div class="register-link">
+        <a [routerLink]="['/register-user']"> Créez un compte </a>
       </div>
 
-      <!-- Bouton -->
-      <button type="submit" [disabled]="loginForm.invalid">Se connecter</button>
+      <button type="submit" class="ripple-btn" [disabled]="loginForm.invalid">
+        Se connecter
+      </button>
 
-      <!-- Message d'erreur -->
       <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}
       </div>
     </form>
+
+    <ion-button class="b-google" (click)="loginWithGoogle()">
+  <ion-icon name="logo-google" slot="start"></ion-icon>
+  Se connecter avec Google
+</ion-button>
   </div>
 </div>

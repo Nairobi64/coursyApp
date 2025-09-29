@@ -1,66 +1,76 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar style="--background: #ff7f00; color: #fff;">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
+    <ion-title>Call-coursy</ion-title>
   </ion-toolbar>
 </ion-header>
 
+<ion-content class="ion-padding" fullscreen="true">
 
-<ion-content class="ion-padding">
   <div class="commande-modern">
- 
+
     <!-- Titre principal -->
-    <ion-card class="form-card ion-padding">
-     <h3 style="color: #ff7f00;">Commander un coursier</h3>
+    <ion-card class="form-card">
+      <h2 class="title-center">Commander un coursier</h2>
 
       <form [formGroup]="commandeForm" (ngSubmit)="onSubmit()">
 
         <!-- Champ départ -->
-        <ion-item lines="full">
-          <ion-icon name="locate-outline" slot="start"></ion-icon>
+        <ion-item lines="full" class="input-card">
+          <ion-icon name="locate-outline" slot="start" class="icon-field"></ion-icon>
           <ion-input
             formControlName="depart"
             placeholder="Adresse de départ"
-            [value]="commandeForm.get('depart')?.value"
             (ionInput)="searchPlace($event, 'depart')"
             (ionFocus)="selectedField = 'depart'"
             (ionBlur)="suggestions = []"
           ></ion-input>
         </ion-item>
 
-        <!-- Suggestions pour départ -->
-        <ion-list *ngIf="suggestions.length > 0 && selectedField === 'depart'">
-          <ion-item *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion, 'depart')">
+        <!-- Suggestions départ -->
+        <ion-list *ngIf="suggestions.length > 0 && selectedField === 'depart'" inset>
+          <ion-item
+            button
+            *ngFor="let suggestion of suggestions"
+            (click)="selectSuggestion(suggestion, 'depart')"
+          >
+            <ion-icon name="location-outline" slot="start"></ion-icon>
             {{ suggestion.description }}
           </ion-item>
         </ion-list>
 
+        <!-- Erreur départ -->
         <ion-text color="danger" *ngIf="formSubmitted && commandeForm.get('depart')?.hasError('required')">
           <p class="ion-padding-start">L'adresse de départ est requise.</p>
         </ion-text>
 
         <!-- Champ destination -->
-        <ion-item lines="full" class="ion-margin-top">
-          <ion-icon name="flag-outline" slot="start"></ion-icon>
+        <ion-item lines="full" class="input-card ion-margin-top">
+          <ion-icon name="flag-outline" slot="start" class="icon-field"></ion-icon>
           <ion-input
             formControlName="destination"
             placeholder="Adresse de destination"
-            [value]="commandeForm.get('destination')?.value"
             (ionInput)="searchPlace($event, 'destination')"
             (ionFocus)="selectedField = 'destination'"
             (ionBlur)="suggestions = []"
           ></ion-input>
-
         </ion-item>
 
-        <!-- Suggestions pour destination -->
-        <ion-list *ngIf="suggestions.length > 0 && selectedField === 'destination'">
-          <ion-item *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion, 'destination')">
+        <!-- Suggestions destination -->
+        <ion-list *ngIf="suggestions.length > 0 && selectedField === 'destination'" inset>
+          <ion-item
+            button
+            *ngFor="let suggestion of suggestions"
+            (mousedown)="selectSuggestion(suggestion, 'destination')"
+          >
+            <ion-icon name="flag-outline" slot="start"></ion-icon>
             {{ suggestion.description }}
           </ion-item>
         </ion-list>
 
+        <!-- Erreur destination -->
         <ion-text color="danger" *ngIf="formSubmitted && commandeForm.get('destination')?.hasError('required')">
           <p class="ion-padding-start">L'adresse de destination est requise.</p>
         </ion-text>
@@ -79,26 +89,22 @@
     </ion-card>
 
     <!-- Section services -->
-    <div class="services-section ion-margin-top">
-      <h3 class="services-title text-center">Nos Services</h3>
+    <div class="services-section">
+      <h3 class="services-title title-center">Nos Services</h3>
 
-      <div class="services-list grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="services-list">
         <ion-card class="service-card taxi" (click)="goToTaxi()" color="light">
           <ion-icon name="car-sport-outline" class="service-icon"></ion-icon>
-          <div>
-            <span class="service-name">Taxi</span> <br><br>
-            <img src="assets/images/taxi.jpeg" alt="Taxi" class="service-img" />
-            <p class="service-desc">Déplacez-vous rapidement en ville.</p>
-          </div>
+          <span class="service-name">Taxi</span>
+          <img src="assets/images/taxi.jpeg" alt="Taxi" class="service-img" />
+          <p class="service-desc">Déplacez-vous rapidement en ville.</p>
         </ion-card>
 
         <ion-card class="service-card livraison" (click)="goToColis()" color="light">
           <ion-icon name="bicycle-outline" class="service-icon"></ion-icon>
-          <div>
-            <span class="service-name">NosColis</span><br><br>
-            <img src="assets/images/coursier.jpeg" alt="Taxi" class="service-img" />
-            <p class="service-desc">Envoyez et recevez vos colis de Dakar a Thies.</p>
-          </div>
+          <span class="service-name">NosColis</span>
+          <img src="assets/images/coursier.jpeg" alt="Coursier" class="service-img" />
+          <p class="service-desc">Envoyez et recevez vos colis de Dakar à Thiès.</p>
         </ion-card>
       </div>
     </div>

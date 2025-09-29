@@ -1,46 +1,55 @@
-
-/* suivi-colis.component.scss */
 .suivi-container {
   padding: 20px;
-  max-width: 500px;
+  max-width: 600px;
   margin: auto;
 
   .title {
     text-align: center;
     color: #ff7f00;
-    margin-bottom: 20px;
+    margin: 20px 0;
+    font-size: 1.6rem;
+    font-weight: bold;
   }
 
   .suivi-card {
-    padding: 20px;
-    border: 2px solid #ff7f00;
-    border-radius: 12px;
-    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    background: #fffdf9;
 
     ion-input {
-      margin-bottom: 15px;
+      font-size: 1rem;
     }
 
     ion-button {
-      background-color: #ff7f00;
-      color: #fff;
+      margin-top: 15px;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(255, 127, 0, 0.4);
     }
   }
 
   .result-card {
+    margin-top: 25px;
     padding: 20px;
-    border: 2px solid #ff7f00;
-    border-radius: 12px;
-    background-color: #fff9f0;
+    border-radius: 18px;
+    background: #fffaf4;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 
     h2 {
       color: #ff7f00;
       margin-bottom: 15px;
+      font-size: 1.3rem;
+      text-align: center;
     }
 
-    p {
-      margin-bottom: 10px;
+    ion-item {
+      --background: transparent;
       font-weight: 500;
+      margin-bottom: 8px;
+
+      ion-icon {
+        font-size: 1.4rem;
+      }
     }
   }
 }

@@ -1,3 +1,4 @@
+import { AuthServiceService } from './../../services/auth.service.service';
 import { Component, OnInit, inject  } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -7,7 +8,6 @@ import { RouterModule, Router } from '@angular/router';
 
 import { Auth } from '@angular/fire/auth';
 import { Firestore } from '@angular/fire/firestore';
-import { AuthServiceService } from 'src/app/services/auth.service.service';
 
 @Component({
   selector: 'app-register-driver',

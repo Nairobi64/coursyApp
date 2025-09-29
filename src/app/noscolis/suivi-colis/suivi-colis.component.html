@@ -1,26 +1,62 @@
-<!-- suivi-colis.component.html -->
-<div class="suivi-container">
+<ion-header>
+  <ion-toolbar style="--background: #ff7f00; color: #fff;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="color:#fff; font-weight:bold;">📦 Suivi Colis</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="suivi-container">
+  <!-- Bouton retour -->
   <ion-buttons slot="start">
     <ion-back-button defaultHref="/user/commande" text="Retour" icon="arrow-back-outline"></ion-back-button>
-  </ion-buttons> <br>
-  <h1 class="title">Suivi de colis</h1>
+  </ion-buttons>
 
+  <!-- Titre -->
+  <h1 class="title">Suivi de votre colis</h1>
+
+  <!-- Formulaire recherche -->
   <ion-card class="suivi-card">
-    <ion-label position="stacked">Numéro de suivi</ion-label>
-    <ion-input [(ngModel)]="trackingNumber" placeholder="Entrez votre numéro de suivi"></ion-input>
+    <ion-item lines="none">
+      <ion-icon name="search-outline" slot="start" color="warning"></ion-icon>
+      <ion-input [(ngModel)]="trackingNumber" placeholder="Entrez votre numéro de suivi"></ion-input>
+    </ion-item>
 
-    <ion-button expand="block" color="warning" (click)="rechercherColis()" [disabled]="loading">
-      {{ loading ? 'Recherche...' : 'Rechercher' }}
+    <ion-button expand="block" shape="round" color="warning" (click)="rechercherColis()" [disabled]="loading">
+      {{ loading ? '🔍 Recherche...' : 'Rechercher' }}
     </ion-button>
   </ion-card>
 
+  <!-- Résultats -->
   <ion-card *ngIf="colis" class="result-card">
-    <h2>Informations du colis</h2>
-    <p><strong>Poids :</strong> {{ colis.poids }}</p>
-    <p><strong>Volume :</strong> {{ colis.volume }}</p>
-    <p><strong>Adresse :</strong> {{ colis.adresse }}</p>
-    <p><strong>Téléphone :</strong> {{ colis.telephone }}</p>
-    <p><strong>Statut :</strong> <span [ngStyle]="{'color': colis.statut === 'En attente' ? '#ff7f00' : 'green'}">{{ colis.statut }}</span></p>
-    <p><strong>Numéro de suivi :</strong> {{ colis.suivi }}</p>
+    <h2>📋 Informations du colis</h2>
+
+    <ion-list lines="none">
+      <ion-item>
+        <ion-icon name="cube-outline" slot="start" color="warning"></ion-icon>
+        <ion-label><strong>Poids :</strong> {{ colis.poids }} Kg</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-icon name="location-outline" slot="start" color="warning"></ion-icon>
+        <ion-label><strong>Adresse :</strong> {{ colis.destinataireAdresse }}</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-icon name="call-outline" slot="start" color="warning"></ion-icon>
+        <ion-label><strong>Téléphone :</strong> {{ colis.destinataireTel }}</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-icon name="flag-outline" slot="start" [color]="colis.statut === 'En attente' ? 'warning' : 'success'"></ion-icon>
+        <ion-label><strong>Statut :</strong> 
+          <span [ngStyle]="{'color': colis.statut === 'En attente' ? '#ff7f00' : 'green'}">
+            {{ colis.statut }}
+          </span>
+        </ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-icon name="pricetag-outline" slot="start" color="warning"></ion-icon>
+        <ion-label><strong>Numéro de suivi :</strong> {{ colis.trackingNumber }}</ion-label>
+      </ion-item>
+    </ion-list>
   </ion-card>
-</div>
+</ion-content>

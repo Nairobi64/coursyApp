@@ -1,5 +1,5 @@
-<ion-header>
-  <ion-toolbar style="color:#ff7f00;">
+<ion-header collapse="fade">
+  <ion-toolbar color="warning">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
@@ -7,67 +7,71 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" style="--background: #fff;">
-  <div class="trajet-container">
+<ion-content fullscreen class="trajet-content">
 
-    <!-- Carte -->
-    <div class="map-section">
-      <div id="map"></div>
-      <div [class.loader-visible]="loading && !Livreur" class="loader-overlay">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Recherche d’un livreur disponible...</p>
+  <!-- 📍 Carte pleine page -->
+  <div class="map-fullscreen">
+    <div id="map"></div>
+    <div [class.loader-visible]="loading && !Livreur" class="loader-overlay">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Recherche d’un livreur disponible...</p>
+    </div>
+  </div>
+
+  <!-- 📦 Superposition des infos -->
+  <div class="overlay-info">
+
+    <!-- Infos trajet -->
+    <div class="overlay-block" *ngIf="trajet && !loading">
+      <div class="trajet-row">
+        <ion-icon name="walk-outline" class="icon-color"></ion-icon>
+        <span>Distance : {{ trajet.distance }} km</span>
+      </div>
+      <div class="trajet-row">
+        <ion-icon name="time-outline" class="icon-color"></ion-icon>
+        <span>Duree estimee : {{ trajet.duree }} min</span>
+      </div>
+      <div class="trajet-row">
+        <ion-icon name="cash-outline" class="icon-color"></ion-icon>
+        <span>Prix : {{ trajet.prix }} FCFA</span>
       </div>
     </div>
 
-    <!-- Infos trajet -->
-    <ion-card class="recap-card card-anim" *ngIf="trajet && !loading">
-      <ion-card-content>
-        <div class="trajet-info">
-          <div class="trajet-row">
-            <ion-icon name="walk-outline"></ion-icon>
-            <span>Distance :</span>
-            <span>{{ trajet.distance }} km</span>
-          </div>
-          <div class="trajet-row">
-            <ion-icon name="time-outline"></ion-icon>
-            <span>Durée estimée :</span>
-            <span>{{ trajet.duree }} min</span>
-          </div>
-          <div class="trajet-row">
-            <ion-icon name="cash-outline"></ion-icon>
-            <span>Prix :</span>
-            <span>{{ trajet.prix }} FCFA</span>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
     <!-- Profil livreur -->
-    <ion-card class="driver-card card-anim" *ngIf="Livreur">
-      <ion-card-content>
-        <div class="driver-info">
-          <img *ngIf="Livreur.photoURL" [src]="Livreur.photoURL" alt="Photo du livreur" class="driver-photo">
-          <div class="driver-name-role">
-            <div class="driver-name">{{ Livreur.prenom }}</div>
-            <div class="driver-role">{{ Livreur.role | titlecase }}</div>
-          </div>
+    <div class="overlay-block driver" *ngIf="Livreur">
+      <div class="driver-info">
+        <img *ngIf="Livreur.photoURL" [src]="Livreur.photoURL" alt="Livreur" class="driver-photo" />
+        <div>
+          <div class="driver-name">{{ Livreur.prenom }}</div>
+          <div class="driver-role">{{ Livreur.role | titlecase }}</div>
         </div>
-        <div class="driver-actions">
-          <ion-button color="primary" (click)="callLivreur()">
-            <ion-icon name="call-outline" slot="start"></ion-icon>
-            Appeler
-          </ion-button>
-          <ion-button color="secondary" (click)="messageLivreur()">
-            <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-            Message
-          </ion-button>
-        </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
+      <div class="driver-actions">
+        <ion-button class="btn-call" (click)="callLivreur()">
+          <ion-icon name="call-outline" slot="start"></ion-icon>
+          Appeler
+        </ion-button>
+        <!-- <ion-button class="btn-msg" (click)="messageLivreur()">
+          <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+          Message
+        </ion-button> -->
+      </div>
+    </div>
 
-    <ion-button expand="full" color="danger" (click)="annulerCommande()">
-      Annuler la livraison
-    </ion-button>
+    <!-- Bouton annuler -->
+    <div class="cancel-text" (click)="annulerCommande()">Annuler</div>
+
+    <!-- Annulation -->
+    <div class="annulation" *ngIf="trajet?.statut === 'annulée'">
+      <p class="motif">
+        <strong>Motif d’annulation :</strong> {{ trajet.motifAnnulation }}
+      </p>
+      <p class="auteur">
+        <strong>Annulé par :</strong>
+        <span *ngIf="trajet.annulePar === 'client'">Client</span>
+      </p>
+    </div>
 
   </div>
+
 </ion-content>

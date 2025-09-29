@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar style="--background: #ff7f00; color: #fff;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Historique Livraison</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-spinner *ngIf="loading" name="crescent" color="primary"></ion-spinner>
+
+  <ion-list *ngIf="!loading && userLivraisons.length > 0">
+    <ion-card *ngFor="let livraison of userLivraisons">
+      <ion-card-header>
+        <ion-card-title>
+          Livraison #{{ livraison.id }}
+        </ion-card-title>
+        <ion-card-subtitle>
+          <ion-badge [color]="getStatusColor(livraison.statut)">
+            {{ livraison.statut | titlecase }}
+          </ion-badge>
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p><strong>Date :</strong> {{ livraison.createdAt?.toDate() | date:'short' }}</p>
+        <p><strong>Motif :</strong> {{ livraison.motifAnnulation || '—' }}</p>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <ion-text color="medium" *ngIf="!loading && userLivraisons.length === 0">
+    <p class="ion-text-center">Vous n’avez pas courses enregistrées pour le moment.</p>
+  </ion-text>
+
+</ion-content>

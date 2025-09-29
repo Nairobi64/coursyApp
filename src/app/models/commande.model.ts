@@ -6,7 +6,7 @@ export interface Commande {
   distance: number;
   duree: number;
   prix: number;
-  statut: 'en attente' | 'prise en charge' | 'terminée';
+  statut: 'en attente' | 'prise en charge' | 'terminée'| 'annulée';
   chauffeur?: {
     uid: string;
     prenom: string;

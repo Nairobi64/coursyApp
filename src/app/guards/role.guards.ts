@@ -15,7 +15,16 @@ export const roleGuard = (expectedRole: string): CanActivateFn => {
       return false;
     }
 
-    const collection = expectedRole === 'driver' ? 'drivers' : expectedRole === 'admin' ? 'admins' : 'users';
+    // 🔥 Déterminer la bonne collection selon le rôle
+    let collection = 'users';
+    if (expectedRole === 'drivers') {
+      collection = 'drivers';
+    } else if (expectedRole === 'admins') {
+      collection = 'admins';
+    } else if (expectedRole === 'livreurs') {
+      collection = 'livreurs';
+    }
+
     const userDocRef = doc(db, `${collection}/${user.uid}`);
     const snap = await getDoc(userDocRef);
 
@@ -24,7 +33,8 @@ export const roleGuard = (expectedRole: string): CanActivateFn => {
       return true;
     }
 
-    router.navigate(['/indisponible ']);
+    // 🚨 Corrigé : enlever l’espace à la fin
+    router.navigate(['/indisponible']);
     return false;
   };
 };
